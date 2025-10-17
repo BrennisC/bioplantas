@@ -1,0 +1,63 @@
+[
+  {
+    "id": "aloe",
+    "name": "Aloe Vera",
+    "scientificName": "Aloe barbadensis miller",
+    "description": "Gel calmante para quemaduras y cuidado de la piel.",
+    "category": "Suculentas",
+    "properties": "Cicatrizante, hidratante",
+    "image": "/placeholder.svg",
+    "tags": ["piel", "antiinflamatorio"],
+    "ailments": ["piel", "quemaduras"]
+  },
+  {
+    "id": "manzanilla",
+    "name": "Manzanilla",
+    "scientificName": "Matricaria chamomilla",
+    "description": "Infusión relajante y digestiva.",
+    "category": "Flores",
+    "properties": "Calmantes, antiinflamatorias",
+    "image": "/placeholder.svg",
+    "tags": ["digestivo", "relajante"]
+  },
+  {
+    "id": "lavanda",
+    "name": "Lavanda",
+    "scientificName": "Lavandula angustifolia",
+    "description": "Relajante y aromática.",
+    "category": "Flores",
+    "properties": "Relajantes, antisépticas",
+    "image": "/placeholder.svg",
+    "tags": ["relajante", "aromática"]
+  },
+  {
+    "id": "menta",
+    "name": "Menta",
+    "scientificName": "Mentha spicata",
+    "description": "Refrescante, ayuda con la digestión y el aliento.",
+    "category": "Hierbas",
+    "properties": "Digestivas, refrescantes",
+    "image": "/placeholder.svg",
+    "tags": ["digestivo", "refrescante"]
+  },
+  {
+    "id": "romero",
+    "name": "Romero",
+    "scientificName": "Rosmarinus officinalis",
+    "description": "Estimulante, antioxidante.",
+    "category": "Hierbas",
+    "properties": "Estimulantes, antioxidantes",
+    "image": "/placeholder.svg",
+    "tags": ["circulación", "energía"]
+  },
+  {
+    "id": "eucalipto",
+    "name": "Eucalipto",
+    "scientificName": "Eucalyptus globulus",
+    "description": "Descongestionante natural para vías respiratorias.",
+    "category": "Árboles",
+    "properties": "Descongestionantes",
+    "image": "/placeholder.svg",
+    "tags": ["respiratorio", "descongestionante"]
+  }
+]
