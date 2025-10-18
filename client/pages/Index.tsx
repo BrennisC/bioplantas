@@ -113,13 +113,13 @@ export default function Index() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   {!session ? (
                     <>
-                      <a 
-                        href="/register" 
+                      <button 
+                        onClick={() => navigate('/register')}
                         className="inline-flex items-center justify-center gap-2 bg-white text-herbal-700 px-8 py-4 rounded-full font-bold text-lg hover:bg-green-50 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                       >
                         Comenzar gratis
                         <ArrowRight className="w-5 h-5" />
-                      </a>
+                      </button>
                       <button 
                         onClick={() => scrollToSection('what-is')}
                         className="inline-flex items-center justify-center gap-2 bg-herbal-600/80 backdrop-blur-sm text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-herbal-700 hover:shadow-xl transition-all duration-300 border-2 border-white/30"
@@ -336,13 +336,13 @@ export default function Index() {
             className="text-center"
           >
             {!session ? (
-              <a 
-                href="/register" 
+              <button 
+                onClick={() => navigate('/register')}
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-herbal-600 to-green-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
               >
                 Comenzar ahora gratis
                 <ArrowRight className="w-5 h-5" />
-              </a>
+              </button>
             ) : (
               <button 
                 onClick={() => navigate('/explorar')}
@@ -402,7 +402,7 @@ export default function Index() {
                 </ul>
                 <div className="mt-4 pt-4 border-t border-herbal-200">
                   <p className="text-sm text-gray-600 text-center">
-                    <a href="/register" className="text-herbal-600 font-semibold hover:underline">Regístrate</a> o <a href="/login" className="text-herbal-600 font-semibold hover:underline">inicia sesión</a> para ver información completa
+                    <button onClick={() => navigate('/register')} className="text-herbal-600 font-semibold hover:underline">Regístrate</button> o <button onClick={() => navigate('/login')} className="text-herbal-600 font-semibold hover:underline">inicia sesión</button> para ver información completa
                   </p>
                 </div>
               </div>
