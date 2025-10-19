@@ -114,7 +114,10 @@ export default function Index() {
                   {!session ? (
                     <>
                       <button 
-                        onClick={() => navigate('/register')}
+                        onClick={() => {
+                          console.log('Navegando a /register...');
+                          navigate('/register');
+                        }}
                         className="inline-flex items-center justify-center gap-2 bg-white text-herbal-700 px-8 py-4 rounded-full font-bold text-lg hover:bg-green-50 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                       >
                         Comenzar gratis
@@ -337,7 +340,10 @@ export default function Index() {
           >
             {!session ? (
               <button 
-                onClick={() => navigate('/register')}
+                onClick={() => {
+                  console.log('Navegando a /register desde CTA...');
+                  navigate('/register');
+                }}
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-herbal-600 to-green-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
               >
                 Comenzar ahora gratis

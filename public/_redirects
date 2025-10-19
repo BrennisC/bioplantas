@@ -1,0 +1,5 @@
+# Redirigir rutas de API a las funciones de Netlify
+/api/*  /.netlify/functions/api/:splat  200
+
+# Redirigir todas las otras rutas al index.html para SPA (React Router)
+/*  /index.html  200
