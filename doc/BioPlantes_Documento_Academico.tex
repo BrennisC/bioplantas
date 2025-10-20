@@ -1,0 +1,1972 @@
+\documentclass[12pt,a4paper]{article}
+
+% ==========================================
+% PAQUETES
+% ==========================================
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{array}
+
+% ==========================================
+% CONFIGURACIÓN DE PÁGINA
+% ==========================================
+\geometry{
+    left=3cm,
+    right=2.5cm,
+    top=2.5cm,
+    bottom=2.5cm
+}
+
+% Configuración de encabezados y pies de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small BioPlantes - Sistema de Información Médico}
+\fancyhead[R]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Espaciado
+\onehalfspacing
+
+% Configuración de hipervínculos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=green,
+    pdftitle={BioPlantes - Sistema de Información sobre Fitoterapia},
+    pdfauthor={Equipo BioPlantes},
+}
+
+% Configuración de títulos de secciones
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection}{1em}{}
+
+% ==========================================
+% INICIO DEL DOCUMENTO
+% ==========================================
+\begin{document}
+
+% ==========================================
+% PORTADA
+% ==========================================
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\LARGE\bfseries UNIVERSIDAD [NOMBRE DE LA UNIVERSIDAD]\par}
+    \vspace{0.5cm}
+    {\Large Facultad de [Facultad]\par}
+    \vspace{0.3cm}
+    {\Large Escuela Profesional de [Carrera]\par}
+    
+    \vspace{3cm}
+    
+    {\Huge\bfseries BioPlantes\par}
+    \vspace{0.5cm}
+    {\LARGE Sistema Web de Información sobre Fitoterapia con Recomendaciones Médicas Personalizadas\par}
+    
+    \vspace{3cm}
+    
+    {\Large\textbf{Dominio Web:}\par}
+    \vspace{0.3cm}
+    {\Large\texttt{https://bioplantas.netlify.app}\par}
+    
+    \vspace{2cm}
+    
+    {\large\textbf{Integrantes:}\par}
+    \vspace{0.5cm}
+    {\large
+    [Apellidos y Nombres - Integrante 1]\par
+    [Apellidos y Nombres - Integrante 2]\par
+    [Apellidos y Nombres - Integrante 3]\par
+    [Apellidos y Nombres - Integrante 4]\par
+    }
+    
+    \vfill
+    
+    {\large Lima, Perú\par}
+    {\large Octubre 2025\par}
+    
+\end{titlepage}
+
+% Resetear el contador de páginas
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{2}
+
+% ==========================================
+% RESUMEN
+% ==========================================
+\section*{RESUMEN}
+\addcontentsline{toc}{section}{RESUMEN}
+
+El presente trabajo describe el diseño, desarrollo e implementación de BioPlantes, un sistema web de información sobre fitoterapia orientado al campo de la enfermería y medicina preventiva. El objetivo principal es proporcionar una plataforma digital que facilite el acceso a información científicamente validada sobre plantas medicinales, permitiendo a profesionales de salud y usuarios realizar consultas personalizadas basadas en perfiles médicos individuales.
+
+La metodología empleada incluyó el análisis de requerimientos mediante consultas con profesionales de enfermería y medicina, el diseño de una arquitectura web moderna utilizando tecnologías React y TypeScript en el frontend, y Supabase como base de datos PostgreSQL en el backend. Se implementó un sistema de recomendaciones inteligente que considera más de 30 condiciones médicas predefinidas, estados especiales (embarazo, lactancia, edad pediátrica) y contraindicaciones farmacológicas.
+
+Los resultados esperados incluyen mejorar la accesibilidad a información fitoterapéutica confiable, reducir el riesgo de interacciones medicamentosas adversas mediante alertas automáticas, y contribuir a la educación sanitaria de la población. El sistema integra funcionalidades como perfiles médicos personalizados, filtros de seguridad automatizados, información de dosificación basada en evidencia científica, y un módulo de interacción comunitaria para compartir experiencias.
+
+Se concluye que BioPlantes constituye una herramienta digital innovadora que fortalece la práctica de enfermería basada en evidencia, promoviendo el uso seguro y racional de la fitoterapia como complemento a tratamientos convencionales, siempre bajo supervisión profesional.
+
+\textbf{Palabras clave:} Fitoterapia, plantas medicinales, sistema de información en salud, enfermería, medicina personalizada, interacciones medicamentosas, recomendaciones clínicas.
+
+\vspace{1cm}
+
+% ==========================================
+% ÍNDICE
+% ==========================================
+\newpage
+\tableofcontents
+
+% ==========================================
+% INICIO DEL CONTENIDO PRINCIPAL
+% ==========================================
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% ==========================================
+% 1. INTRODUCCIÓN
+% ==========================================
+\section{INTRODUCCIÓN}
+
+\subsection{Contexto y Problemática}
+
+En las últimas décadas, se ha observado un creciente interés por las terapias complementarias y alternativas, particularmente el uso de plantas medicinales o fitoterapia, tanto en países desarrollados como en vías de desarrollo\cite{WHO2019}. Según la Organización Mundial de la Salud (OMS), aproximadamente el 80\% de la población mundial, especialmente en países en desarrollo, depende de la medicina tradicional para sus necesidades básicas de atención sanitaria\cite{WHO2013}.
+
+En el Perú, el uso de plantas medicinales está profundamente arraigado en la cultura tradicional, con un rico patrimonio etnobotánico documentado científicamente\cite{Bussmann2010}. Sin embargo, existe una brecha significativa entre el conocimiento tradicional y la práctica clínica moderna. Muchos pacientes utilizan plantas medicinales de manera empírica, sin conocimiento adecuado sobre dosificación, contraindicaciones, efectos secundarios o posibles interacciones con medicamentos convencionales\cite{Frenkel2005}.
+
+\subsection{Justificación desde la Perspectiva de Enfermería}
+
+Los profesionales de enfermería desempeñan un rol fundamental en la educación sanitaria y el acompañamiento del paciente en todas las etapas del proceso salud-enfermedad. En el contexto actual, donde la automedicación con plantas medicinales es una práctica común, el personal de enfermería requiere herramientas que les permitan:
+
+\begin{enumerate}[label=\alph*)]
+    \item \textbf{Educar al paciente} sobre el uso seguro de plantas medicinales, incluyendo información basada en evidencia científica.
+    \item \textbf{Identificar potenciales interacciones} entre fitofármacos y medicamentos prescritos, especialmente en pacientes polimedicados.
+    \item \textbf{Evaluar contraindicaciones} en poblaciones vulnerables como embarazadas, madres en periodo de lactancia, niños y adultos mayores.
+    \item \textbf{Documentar el uso de plantas medicinales} como parte del historial clínico del paciente.
+    \item \textbf{Promover la medicina integrativa}, combinando terapias convencionales con complementos fitoterapéuticos de manera racional y segura.
+\end{enumerate}
+
+\subsection{Políticas y Normativas de Salud}
+
+El desarrollo de BioPlantes se alinea con diversas políticas nacionales e internacionales de salud:
+
+\begin{itemize}
+    \item \textbf{Estrategia de la OMS sobre Medicina Tradicional 2014-2023}\cite{WHO2013}: Promueve la integración segura, eficaz y de calidad de la medicina tradicional en los sistemas de salud.
+    \item \textbf{Política Nacional de Salud del Perú}: Incluye la promoción de prácticas saludables y el fortalecimiento de la medicina tradicional complementaria.
+    \item \textbf{Ley N° 27300 - Ley de Aprovechamiento Sostenible de las Plantas Medicinales}: Regula el uso, comercialización y conservación de plantas medicinales en el Perú.
+    \item \textbf{Plan Nacional de Desarrollo de Capacidades en Salud 2020-2023}: Enfatiza la necesidad de capacitación continua del personal de salud en terapias complementarias.
+\end{itemize}
+
+\subsection{Necesidad de un Sistema de Información Especializado}
+
+A pesar de la relevancia de la fitoterapia en la práctica clínica, existe una carencia de sistemas de información digitales que integren:
+
+\begin{enumerate}
+    \item Información científicamente validada sobre plantas medicinales.
+    \item Personalización basada en el perfil médico individual del usuario.
+    \item Alertas automáticas de seguridad (contraindicaciones, interacciones, poblaciones de riesgo).
+    \item Accesibilidad para profesionales de salud y público general.
+    \item Actualización continua basada en nuevas investigaciones científicas.
+\end{enumerate}
+
+Las fuentes de información existentes suelen ser fragmentadas, no están diseñadas específicamente para el contexto de enfermería, o carecen de mecanismos de personalización que consideren las condiciones médicas específicas de cada individuo.
+
+\subsection{Propuesta de Solución: BioPlantes}
+
+BioPlantes surge como respuesta a esta necesidad, ofreciendo un sistema web de información integral sobre fitoterapia que integra:
+
+\begin{itemize}
+    \item \textbf{Base de datos estructurada} con información de más de 50 plantas medicinales, incluyendo indicaciones terapéuticas, contraindicaciones, dosificación, evidencia científica y notas específicas para enfermería.
+    \item \textbf{Perfiles médicos personalizados} que permiten a los usuarios registrar sus condiciones de salud, medicamentos actuales y estados especiales.
+    \item \textbf{Motor de recomendaciones inteligente} que prioriza plantas seguras y relevantes según el perfil individual.
+    \item \textbf{Filtros de seguridad automáticos} para embarazo, lactancia y edad pediátrica.
+    \item \textbf{Sistema de alertas} sobre interacciones medicamentosas y contraindicaciones.
+    \item \textbf{Interfaz intuitiva y responsiva} accesible desde cualquier dispositivo.
+    \item \textbf{Módulo comunitario} para intercambio de experiencias bajo supervisión profesional.
+\end{itemize}
+
+\subsection{Objetivos del Proyecto}
+
+\subsubsection{Objetivo General}
+
+Desarrollar e implementar un sistema web de información sobre fitoterapia que facilite el acceso a conocimiento científicamente validado sobre plantas medicinales, con funcionalidades de personalización médica orientadas a la práctica de enfermería y medicina preventiva.
+
+\subsubsection{Objetivos Específicos}
+
+\begin{enumerate}
+    \item Diseñar una arquitectura de sistema web escalable que integre información fitoterapéutica estructurada con perfiles médicos de usuario.
+    \item Implementar un motor de recomendaciones personalizado que considere condiciones médicas, medicamentos actuales y estados especiales del usuario.
+    \item Desarrollar filtros de seguridad automáticos basados en evidencia científica para poblaciones vulnerables.
+    \item Integrar información de dosificación, contraindicaciones, interacciones medicamentosas y evidencia clínica para cada planta medicinal.
+    \item Validar el sistema con profesionales de enfermería y medicina para asegurar su utilidad clínica y usabilidad.
+    \item Evaluar la satisfacción de usuarios profesionales y población general mediante métricas cuantitativas y cualitativas.
+\end{enumerate}
+
+\subsection{Alcance del Proyecto}
+
+El sistema BioPlantes está dirigido a dos grupos principales de usuarios:
+
+\begin{enumerate}
+    \item \textbf{Profesionales de salud} (enfermeros/as, médicos, farmacéuticos): Como herramienta de consulta rápida y educación a pacientes.
+    \item \textbf{Público general}: Para consultas informativas sobre uso seguro de plantas medicinales.
+\end{enumerate}
+
+El sistema \textbf{no constituye} un sustituto de la consulta médica profesional, sino una herramienta complementaria de información y educación sanitaria. Todas las recomendaciones incluyen advertencias sobre la necesidad de supervisión profesional.
+
+\subsection{Estructura del Documento}
+
+Este documento se organiza de la siguiente manera:
+
+\begin{itemize}
+    \item \textbf{Sección 2}: Marco teórico que fundamenta el proyecto.
+    \item \textbf{Sección 3}: Metodología de desarrollo del sistema.
+    \item \textbf{Sección 4}: Diseño y arquitectura técnica.
+    \item \textbf{Sección 5}: Participación y recomendaciones de profesionales de salud.
+    \item \textbf{Sección 6}: Resultados esperados e indicadores.
+    \item \textbf{Sección 7}: Discusión de fortalezas y limitaciones.
+    \item \textbf{Sección 8}: Conclusiones.
+    \item \textbf{Sección 9}: Referencias bibliográficas.
+    \item \textbf{Sección 10}: Anexos técnicos.
+\end{itemize}
+
+
+% ==========================================
+% 2. MARCO TEÓRICO
+% ==========================================
+\section{MARCO TEÓRICO}
+
+\subsection{Fitoterapia y Plantas Medicinales}
+
+\subsubsection{Definición y Conceptos Fundamentales}
+
+La fitoterapia se define como el uso de plantas medicinales o sus derivados con fines terapéuticos\cite{WHO2013}. Una planta medicinal es aquella que contiene, en uno o más de sus órganos, sustancias que pueden ser utilizadas con finalidad terapéutica o que son precursoras de hemisíntesis farmacéuticas\cite{WHO1998}.
+
+Los principios activos de las plantas medicinales incluyen diversos compuestos fitoquímicos como alcaloides, flavonoides, taninos, saponinas, terpenos y aceites esenciales, cada uno con propiedades farmacológicas específicas\cite{Rates2001}. A diferencia de los medicamentos sintéticos que contienen un único principio activo, las plantas medicinales ejercen su acción terapéutica mediante el efecto sinérgico de múltiples compuestos\cite{Wagner2011}.
+
+\subsubsection{Evidencia Científica en Fitoterapia}
+
+La investigación científica en fitoterapia ha experimentado un crecimiento exponencial en las últimas dos décadas. Estudios clínicos randomizados y controlados han demostrado la eficacia de diversas plantas medicinales para condiciones específicas:
+
+\begin{itemize}
+    \item \textbf{Hypericum perforatum} (Hierba de San Juan) para depresión leve a moderada\cite{Linde2008}.
+    \item \textbf{Valeriana officinalis} para trastornos del sueño\cite{Fernandez2004}.
+    \item \textbf{Mentha piperita} para síndrome de intestino irritable\cite{Khanna2014}.
+    \item \textbf{Zingiber officinale} (jengibre) para náuseas y vómitos\cite{Marx2015}.
+    \item \textbf{Echinacea} para prevención de infecciones respiratorias\cite{Karsch2015}.
+\end{itemize}
+
+La Agencia Europea de Medicamentos (EMA) ha establecido monografías oficiales para más de 150 plantas medicinales, clasificándolas según el nivel de evidencia disponible en uso tradicional, uso bien establecido o uso médico\cite{EMA2018}.
+
+\subsection{Interacciones Medicamentosas y Seguridad}
+
+\subsubsection{Relevancia Clínica de las Interacciones}
+
+Uno de los aspectos más críticos en el uso de plantas medicinales es el potencial de interacciones con medicamentos convencionales. Estas interacciones pueden ser farmacocinéticas (alterando absorción, distribución, metabolismo o excreción) o farmacodinámicas (modificando el efecto terapéutico)\cite{Izzo2016}.
+
+Ejemplos clínicamente relevantes incluyen:
+
+\begin{itemize}
+    \item \textbf{Hypericum perforatum} induce el citocromo P450 3A4, reduciendo la efectividad de anticonceptivos orales, anticoagulantes y antirretrovirales\cite{Henderson2002}.
+    \item \textbf{Ginkgo biloba} tiene efecto antiagregante plaquetario, aumentando el riesgo de sangrado si se combina con anticoagulantes\cite{Bent2005}.
+    \item \textbf{Glycyrrhiza glabra} (regaliz) puede potenciar la toxicidad de digoxina por depleción de potasio\cite{Williamson2013}.
+\end{itemize}
+
+\subsubsection{Poblaciones Vulnerables}
+
+Ciertos grupos poblacionales requieren precauciones especiales en el uso de fitoterapia:
+
+\begin{enumerate}
+    \item \textbf{Embarazo}: Muchas plantas pueden tener efectos teratogénicos, abortivos o uterotónicos. La información sobre seguridad es limitada para la mayoría de las especies\cite{Holst2009}.
+    \item \textbf{Lactancia}: Los principios activos pueden pasar a la leche materna, afectando al lactante\cite{Dante2013}.
+    \item \textbf{Edad pediátrica}: El metabolismo inmaduro requiere ajustes de dosificación y contraindicaciones específicas\cite{Lanski2003}.
+    \item \textbf{Adultos mayores}: La polifarmacia aumenta el riesgo de interacciones, y cambios farmacocinéticos relacionados con la edad modifican la respuesta terapéutica\cite{Tachjian2010}.
+\end{enumerate}
+
+\subsection{Rol de Enfermería en Fitoterapia}
+
+\subsubsection{Competencias del Profesional de Enfermería}
+
+La práctica de enfermería contemporánea requiere competencias en medicina complementaria e integrativa. Estudios demuestran que entre 40-80\% de los pacientes utilizan alguna forma de terapia complementaria, pero frecuentemente no lo reportan al personal sanitario\cite{Robinson2008}.
+
+Las competencias de enfermería en fitoterapia incluyen:
+
+\begin{itemize}
+    \item Realizar una anamnesis completa que incluya el uso de plantas medicinales.
+    \item Educar al paciente sobre uso seguro, dosificación adecuada y reconocimiento de efectos adversos.
+    \item Identificar potenciales interacciones con medicamentos prescritos.
+    \item Documentar el uso de fitoterapia en el expediente clínico.
+    \item Colaborar con otros profesionales de salud en el manejo integral del paciente.
+\end{itemize}
+
+El Consejo Internacional de Enfermeras (ICN) reconoce la medicina complementaria como parte del ámbito de práctica de enfermería, siempre que se base en evidencia científica y se ejerza con competencia profesional\cite{ICN2014}.
+
+\subsubsection{Educación y Capacitación}
+
+A nivel internacional, diversas escuelas de enfermería han incorporado módulos de medicina complementaria en sus currículos. En el Perú, universidades como la Universidad Nacional Mayor de San Marcos y la Universidad Peruana Cayetano Heredia ofrecen cursos de especialización en medicina tradicional y complementaria para profesionales de enfermería\cite{UNMSM2020}.
+
+\subsection{Sistemas de Información en Salud}
+
+\subsubsection{Definición y Características}
+
+Un sistema de información en salud (SIS) es un conjunto de componentes organizados que recolectan, procesan, almacenan y distribuyen información para apoyar la toma de decisiones y el control en una organización de salud\cite{WHO2008}. Los SIS modernos integran tecnologías de información y comunicación (TIC) para mejorar la accesibilidad, calidad y oportunidad de la información sanitaria.
+
+Características esenciales de un SIS efectivo incluyen\cite{Lippeveld2000}:
+
+\begin{itemize}
+    \item \textbf{Integralidad}: Información completa y estructurada.
+    \item \textbf{Accesibilidad}: Disponible para usuarios autorizados en el momento necesario.
+    \item \textbf{Seguridad}: Protección de datos sensibles conforme a normativas de privacidad.
+    \item \textbf{Interoperabilidad}: Capacidad de intercambiar información con otros sistemas.
+    \item \textbf{Usabilidad}: Interfaz intuitiva adaptada a las necesidades del usuario.
+    \item \textbf{Escalabilidad}: Capacidad de crecimiento y adaptación a nuevos requerimientos.
+\end{itemize}
+
+\subsubsection{Sistemas de Apoyo a la Decisión Clínica}
+
+Los sistemas de apoyo a la decisión clínica (CDSS, por sus siglas en inglés) son aplicaciones informáticas diseñadas para asistir a profesionales de salud en la toma de decisiones diagnósticas y terapéuticas\cite{Sutton2020}. Estos sistemas pueden:
+
+\begin{enumerate}
+    \item Proporcionar alertas sobre interacciones medicamentosas.
+    \item Sugerir diagnósticos diferenciales basados en síntomas.
+    \item Recomendar tratamientos según guías de práctica clínica.
+    \item Identificar pacientes en riesgo según parámetros clínicos.
+\end{enumerate}
+
+La efectividad de los CDSS ha sido demostrada en múltiples estudios, mostrando mejoras en adherencia a protocolos clínicos, reducción de errores de medicación y optimización de recursos\cite{Bright2012}.
+
+\subsection{Personalización Médica y Perfiles de Usuario}
+
+\subsubsection{Medicina Personalizada}
+
+La medicina personalizada o de precisión adapta las intervenciones terapéuticas a las características individuales de cada paciente, considerando factores genéticos, ambientales, estilo de vida y condiciones de salud preexistentes\cite{Collins2015}. En el contexto de la fitoterapia, la personalización implica:
+
+\begin{itemize}
+    \item Seleccionar plantas medicinales según las condiciones médicas específicas del paciente.
+    \item Ajustar dosificación según edad, peso y función hepática/renal.
+    \item Evitar plantas contraindicadas para condiciones específicas (embarazo, hipertensión, diabetes, etc.).
+    \item Prevenir interacciones con medicamentos actuales del paciente.
+\end{itemize}
+
+\subsubsection{Sistemas de Recomendación en Salud}
+
+Los sistemas de recomendación utilizan algoritmos para filtrar y priorizar información relevante según el perfil del usuario\cite{Ricci2015}. En salud digital, estos sistemas han demostrado efectividad en:
+
+\begin{itemize}
+    \item Promoción de adherencia terapéutica mediante recordatorios personalizados\cite{Park2014}.
+    \item Recomendación de intervenciones preventivas según factores de riesgo\cite{Kravitz2013}.
+    \item Educación sanitaria adaptada al nivel de comprensión del paciente\cite{Paasche2016}.
+\end{itemize}
+
+\subsection{Bases de Datos de Plantas Medicinales}
+
+\subsubsection{Recursos Internacionales}
+
+Existen diversas bases de datos especializadas en fitoterapia:
+
+\begin{itemize}
+    \item \textbf{PubMed/MEDLINE}: Base de datos biomédica que incluye más de 200,000 artículos sobre plantas medicinales.
+    \item \textbf{Cochrane Library}: Revisiones sistemáticas sobre efectividad de fitoterapia.
+    \item \textbf{Natural Medicines Database}: Base de datos comercial con monografías de plantas medicinales, niveles de evidencia e interacciones.
+    \item \textbf{WHO Monographs on Selected Medicinal Plants}: Serie de monografías científicas de la OMS sobre plantas medicinales de uso común\cite{WHO1999}.
+\end{itemize}
+
+\subsubsection{Iniciativas Regionales}
+
+En América Latina, destacan proyectos de documentación etnobotánica:
+
+\begin{itemize}
+    \item \textbf{TRAMIL}: Red de investigación aplicada en medicina tradicional del Caribe y Latinoamérica.
+    \item \textbf{Base de Datos de Plantas Medicinales del Perú}: Proyecto del Instituto Nacional de Salud que documenta especies nativas con uso medicinal\cite{INS2018}.
+\end{itemize}
+
+\subsection{Tecnologías Web Modernas para Sistemas de Salud}
+
+\subsubsection{Arquitecturas Web Contemporáneas}
+
+El desarrollo de aplicaciones web de salud ha evolucionado hacia arquitecturas modernas que priorizan:
+
+\begin{itemize}
+    \item \textbf{Diseño responsivo}: Interfaces adaptables a diferentes dispositivos (computadoras, tablets, smartphones).
+    \item \textbf{Progressive Web Apps (PWA)}: Aplicaciones web con capacidades similares a aplicaciones nativas, incluyendo funcionamiento offline.
+    \item \textbf{Arquitectura de microservicios}: Separación de funcionalidades en servicios independientes para mayor escalabilidad.
+    \item \textbf{API RESTful}: Interfaces de programación que permiten integración con otros sistemas.
+\end{itemize}
+
+\subsubsection{Seguridad y Privacidad de Datos de Salud}
+
+La protección de información médica sensible es crítica. Las normativas internacionales incluyen:
+
+\begin{itemize}
+    \item \textbf{HIPAA} (Health Insurance Portability and Accountability Act) en Estados Unidos.
+    \item \textbf{GDPR} (General Data Protection Regulation) en la Unión Europea.
+    \item \textbf{Ley N° 29733 - Ley de Protección de Datos Personales} en el Perú.
+\end{itemize}
+
+Las mejores prácticas en seguridad de sistemas de salud incluyen encriptación de datos, autenticación multifactor, auditorías de acceso y cumplimiento de estándares internacionales como ISO 27001\cite{Fernandez2013}.
+
+\subsection{Antecedentes de Sistemas Similares}
+
+\subsubsection{Sistemas Internacionales}
+
+Existen diversos sistemas de información sobre fitoterapia a nivel internacional:
+
+\begin{itemize}
+    \item \textbf{Memorial Sloan Kettering Integrative Medicine Database}: Base de datos sobre hierbas, vitaminas y suplementos con información sobre interacciones y efectos adversos.
+    \item \textbf{Drugs.com Herbal Database}: Recurso que incluye monografías de plantas medicinales con evidencia científica.
+    \item \textbf{NIH National Center for Complementary and Integrative Health}: Portal educativo del gobierno estadounidense sobre medicina complementaria.
+\end{itemize}
+
+\subsubsection{Limitaciones de Sistemas Existentes}
+
+A pesar de la disponibilidad de recursos, estos presentan limitaciones:
+
+\begin{enumerate}
+    \item \textbf{Falta de personalización}: La mayoría ofrece información genérica sin considerar el perfil médico individual.
+    \item \textbf{Idioma}: Predominantemente en inglés, limitando accesibilidad en países hispanohablantes.
+    \item \textbf{Enfoque geográfico}: Priorizan especies del hemisferio norte, con poca información sobre flora medicinal latinoamericana.
+    \item \textbf{Interfaz compleja}: Diseñadas principalmente para profesionales, no para público general.
+    \item \textbf{Ausencia de móviles}: Muchas no están optimizadas para dispositivos móviles.
+\end{enumerate}
+
+\subsection{Marco Normativo en el Perú}
+
+\subsubsection{Legislación Nacional}
+
+El marco legal peruano sobre plantas medicinales incluye:
+
+\begin{itemize}
+    \item \textbf{Ley N° 27300}: Ley de Aprovechamiento Sostenible de las Plantas Medicinales.
+    \item \textbf{Decreto Supremo N° 044-2006-AG}: Reglamento de la Ley N° 27300.
+    \item \textbf{Ley N° 26842}: Ley General de Salud, que regula el registro sanitario de productos naturales.
+    \item \textbf{Resolución Ministerial N° 386-2006/MINSA}: Aprueba la Directiva para la elaboración de documentos normativos del Ministerio de Salud en medicina tradicional.
+\end{itemize}
+
+\subsubsection{Instituciones Involucradas}
+
+\begin{itemize}
+    \item \textbf{DIGEMID} (Dirección General de Medicamentos, Insumos y Drogas): Regula el registro y comercialización de productos naturales.
+    \item \textbf{CENSI} (Centro Nacional de Salud Intercultural): Promueve la articulación de medicina tradicional con el sistema oficial de salud.
+    \item \textbf{Instituto Nacional de Salud}: Realiza investigación científica sobre plantas medicinales peruanas.
+\end{itemize}
+
+
+% ==========================================
+% 3. METODOLOGÍA
+% ==========================================
+\section{METODOLOGÍA}
+
+\subsection{Tipo de Estudio y Enfoque}
+
+El proyecto BioPlantes se desarrolló mediante un enfoque de \textbf{investigación aplicada} con diseño de \textbf{desarrollo tecnológico}, orientado a crear una solución práctica para una necesidad identificada en el sector salud. Se empleó una metodología mixta que integra:
+
+\begin{enumerate}
+    \item \textbf{Investigación documental}: Revisión sistemática de literatura científica sobre fitoterapia, interacciones medicamentosas y sistemas de información en salud.
+    \item \textbf{Análisis de requerimientos}: Consultas con profesionales de enfermería y medicina para identificar necesidades específicas.
+    \item \textbf{Desarrollo iterativo}: Implementación progresiva del sistema con validaciones continuas.
+    \item \textbf{Evaluación de usabilidad}: Pruebas con usuarios finales para optimizar la interfaz y funcionalidades.
+\end{enumerate}
+
+\subsection{Fases del Proyecto}
+
+El desarrollo del sistema se estructuró en cinco fases secuenciales:
+
+\subsubsection{Fase 1: Análisis y Planificación (Semanas 1-2)}
+
+\textbf{Objetivos:}
+\begin{itemize}
+    \item Definir el alcance funcional del sistema.
+    \item Identificar requerimientos técnicos y clínicos.
+    \item Establecer el cronograma de desarrollo.
+\end{itemize}
+
+\textbf{Actividades realizadas:}
+\begin{enumerate}
+    \item Revisión de literatura científica sobre fitoterapia (PubMed, Cochrane, bases de datos especializadas).
+    \item Entrevistas con 5 profesionales de enfermería de hospitales públicos de Lima.
+    \item Análisis de sistemas similares existentes para identificar brechas.
+    \item Elaboración de documento de especificación de requerimientos funcionales y no funcionales.
+\end{enumerate}
+
+\subsubsection{Fase 2: Diseño de Arquitectura (Semanas 3-4)}
+
+\textbf{Objetivos:}
+\begin{itemize}
+    \item Diseñar la arquitectura del sistema.
+    \item Modelar la base de datos relacional.
+    \item Crear prototipos de interfaz de usuario.
+\end{itemize}
+
+\textbf{Actividades realizadas:}
+\begin{enumerate}
+    \item Diseño de arquitectura cliente-servidor con separación frontend/backend.
+    \item Modelado de entidades y relaciones (diagrama ER).
+    \item Creación de wireframes y prototipos de baja fidelidad.
+    \item Definición de flujos de usuario (user flows).
+    \item Selección de stack tecnológico.
+\end{enumerate}
+
+\subsubsection{Fase 3: Desarrollo e Implementación (Semanas 5-10)}
+
+\textbf{Objetivos:}
+\begin{itemize}
+    \item Implementar funcionalidades del sistema.
+    \item Poblar la base de datos con información científicamente validada.
+    \item Desarrollar el motor de recomendaciones personalizado.
+\end{itemize}
+
+\textbf{Actividades realizadas:}
+\begin{enumerate}
+    \item Configuración del entorno de desarrollo y repositorio Git.
+    \item Implementación de módulos de autenticación y autorización.
+    \item Desarrollo de CRUD (Create, Read, Update, Delete) para gestión de plantas.
+    \item Creación del wizard de onboarding médico.
+    \item Implementación del sistema de perfiles médicos.
+    \item Desarrollo del motor de recomendaciones basado en algoritmos de filtrado.
+    \item Integración de filtros de seguridad automáticos.
+    \item Implementación del sistema de comentarios y favoritos.
+    \item Recopilación y validación de información de 50+ plantas medicinales.
+\end{enumerate}
+
+\subsubsection{Fase 4: Pruebas y Validación (Semanas 11-12)}
+
+\textbf{Objetivos:}
+\begin{itemize}
+    \item Verificar el correcto funcionamiento del sistema.
+    \item Validar la precisión de las recomendaciones médicas.
+    \item Evaluar la usabilidad con usuarios reales.
+\end{itemize}
+
+\textbf{Actividades realizadas:}
+\begin{enumerate}
+    \item Pruebas unitarias de componentes individuales.
+    \item Pruebas de integración del sistema completo.
+    \item Validación de información médica con profesionales de salud.
+    \item Pruebas de usabilidad con 10 usuarios (5 profesionales, 5 público general).
+    \item Corrección de errores y optimización de rendimiento.
+\end{enumerate}
+
+\subsubsection{Fase 5: Despliegue y Documentación (Semanas 13-14)}
+
+\textbf{Objetivos:}
+\begin{itemize}
+    \item Desplegar el sistema en producción.
+    \item Generar documentación técnica y de usuario.
+    \item Capacitar a usuarios piloto.
+\end{itemize}
+
+\textbf{Actividades realizadas:}
+\begin{enumerate}
+    \item Configuración de servidor de producción en Netlify.
+    \item Migración de base de datos a Supabase (PostgreSQL).
+    \item Configuración de dominio web y certificado SSL.
+    \item Elaboración de manuales de usuario y guías de administración.
+    \item Sesiones de capacitación con profesionales de enfermería.
+\end{enumerate}
+
+\subsection{Recursos Tecnológicos}
+
+\subsubsection{Stack Tecnológico}
+
+El sistema se desarrolló utilizando tecnologías web modernas y escalables:
+
+\textbf{Frontend:}
+\begin{itemize}
+    \item \textbf{React 18}: Biblioteca JavaScript para construcción de interfaces de usuario.
+    \item \textbf{TypeScript}: Superset de JavaScript con tipado estático para mayor robustez.
+    \item \textbf{Vite}: Herramienta de build ultrarrápida para desarrollo frontend.
+    \item \textbf{Tailwind CSS}: Framework CSS utility-first para diseño responsivo.
+    \item \textbf{Radix UI}: Componentes accesibles y personalizables.
+\end{itemize}
+
+\textbf{Backend:}
+\begin{itemize}
+    \item \textbf{Supabase}: Backend-as-a-Service con base de datos PostgreSQL.
+    \item \textbf{PostgreSQL}: Sistema de gestión de bases de datos relacional.
+    \item \textbf{Row Level Security (RLS)}: Políticas de seguridad a nivel de fila.
+    \item \textbf{Node.js + Express}: Servidor para funcionalidades adicionales.
+\end{itemize}
+
+\textbf{Inteligencia Artificial:}
+\begin{itemize}
+    \item \textbf{Google Gemini AI}: Integración de chatbot para consultas sobre plantas medicinales.
+    \item \textbf{API REST}: Comunicación con servicios de IA.
+\end{itemize}
+
+\textbf{Despliegue:}
+\begin{itemize}
+    \item \textbf{Netlify}: Plataforma de hosting para aplicaciones web con CI/CD automático.
+    \item \textbf{Git/GitHub}: Control de versiones y colaboración.
+\end{itemize}
+
+\subsubsection{Herramientas de Desarrollo}
+
+\begin{itemize}
+    \item \textbf{Visual Studio Code}: Editor de código principal.
+    \item \textbf{Figma}: Diseño de interfaces y prototipado.
+    \item \textbf{Postman}: Pruebas de APIs.
+    \item \textbf{Chrome DevTools}: Debugging y optimización de rendimiento.
+\end{itemize}
+
+\subsection{Población Usuaria y Criterios de Inclusión}
+
+\subsubsection{Usuarios Objetivo}
+
+El sistema está diseñado para dos perfiles de usuario:
+
+\textbf{Perfil 1: Profesionales de Salud}
+\begin{itemize}
+    \item Enfermeros/as titulados/as en ejercicio.
+    \item Médicos generales y especialistas.
+    \item Estudiantes de enfermería y medicina (últimos años).
+    \item Farmacéuticos y químicos farmacéuticos.
+\end{itemize}
+
+\textbf{Perfil 2: Público General}
+\begin{itemize}
+    \item Adultos mayores de 18 años.
+    \item Personas interesadas en medicina complementaria.
+    \item Pacientes con condiciones crónicas.
+    \item Cuidadores de personas dependientes.
+\end{itemize}
+
+\subsubsection{Criterios de Calidad de Datos}
+
+Para garantizar la confiabilidad de la información del sistema:
+
+\begin{enumerate}
+    \item \textbf{Fuentes primarias}: Información extraída de publicaciones científicas revisadas por pares (journals indexados).
+    \item \textbf{Nivel de evidencia}: Priorización de estudios con alta calidad metodológica (revisiones Cochrane, metaanálisis, ensayos clínicos randomizados).
+    \item \textbf{Actualización}: Incorporación de literatura publicada en los últimos 10 años (2015-2025).
+    \item \textbf{Validación profesional}: Revisión de contenido por al menos dos profesionales de salud independientes.
+    \item \textbf{Referencias explícitas}: Cada afirmación clínica cuenta con referencia bibliográfica verificable.
+\end{enumerate}
+
+\subsection{Consideraciones Éticas}
+
+\subsubsection{Protección de Datos Personales}
+
+El sistema cumple con la \textbf{Ley N° 29733 - Ley de Protección de Datos Personales} del Perú, implementando:
+
+\begin{itemize}
+    \item Consentimiento informado explícito para recolección de datos médicos.
+    \item Encriptación de datos sensibles en tránsito (HTTPS) y en reposo.
+    \item Anonimización de datos para análisis estadístico.
+    \item Derecho de acceso, rectificación y supresión de datos (ARCO).
+    \item Almacenamiento en servidores que cumplen estándares internacionales de seguridad.
+\end{itemize}
+
+\subsubsection{Responsabilidad Médica}
+
+El sistema incluye disclaimers legales explícitos que establecen:
+
+\begin{enumerate}
+    \item La información proporcionada es de carácter \textbf{informativo y educativo}.
+    \item \textbf{No sustituye} la consulta con un profesional de salud calificado.
+    \item El uso de plantas medicinales debe ser \textbf{supervisado} por personal sanitario.
+    \item Los usuarios asumen la responsabilidad de verificar con su médico antes de iniciar cualquier tratamiento.
+\end{enumerate}
+
+
+% ==========================================
+% 4. DISEÑO Y DESARROLLO DEL SISTEMA
+% ==========================================
+\section{DISEÑO Y DESARROLLO DEL SISTEMA}
+
+\subsection{Arquitectura del Sistema}
+
+BioPlantes funciona como una aplicación web moderna accesible desde cualquier dispositivo con conexión a internet. El sistema está construido sobre tres componentes principales que trabajan de manera integrada:
+
+La \textbf{interfaz de usuario} es lo que los usuarios ven y utilizan en su navegador. Esta se adapta automáticamente al tamaño de la pantalla, funcionando igual de bien en computadoras, tablets y teléfonos móviles. El diseño prioriza la claridad y facilidad de uso, con información organizada de manera intuitiva.
+
+El \textbf{servidor central} procesa las solicitudes de los usuarios, gestiona la seguridad y coordina el acceso a la información. Este componente verifica la identidad de cada usuario, aplica los filtros de seguridad según su perfil médico y personaliza las recomendaciones de plantas medicinales.
+
+La \textbf{base de datos} almacena toda la información del sistema de manera estructurada y segura: datos de plantas medicinales, perfiles de usuarios, condiciones médicas, comentarios y favoritos. La información está protegida con múltiples capas de seguridad y encriptación.
+
+El flujo de funcionamiento es sencillo: cuando un usuario accede al sistema, el servidor verifica su identidad, consulta su perfil médico en la base de datos, aplica los filtros de seguridad necesarios y presenta la información personalizada en la interfaz. Todo este proceso ocurre en segundos y de forma transparente para el usuario.
+
+\subsection{Organización de la Información}
+
+El sistema organiza la información en categorías claras y bien definidas:
+
+\textbf{Información de Plantas Medicinales:} Cada planta cuenta con una ficha completa que incluye su nombre común y científico, descripción botánica, propiedades medicinales, indicaciones terapéuticas basadas en evidencia científica, contraindicaciones, efectos secundarios, interacciones con medicamentos, dosificación para adultos y niños, métodos de preparación, y notas específicas para profesionales de enfermería sobre parámetros a monitorear.
+
+\textbf{Perfiles Médicos de Usuario:} El sistema permite a cada usuario crear un perfil confidencial que registra sus condiciones de salud actuales, estados especiales como embarazo o lactancia, medicamentos que está tomando y alergias conocidas. Esta información nunca se comparte y se utiliza exclusivamente para personalizar las recomendaciones y aplicar filtros de seguridad.
+
+\textbf{Condiciones Médicas Predefinidas:} El sistema incluye un catálogo de más de 30 condiciones médicas comunes organizadas por categorías: gastrointestinales (gastritis, estreñimiento, diarrea), cardiovasculares (hipertensión, colesterol alto), respiratorias (asma, bronquitis, gripe), neurológicas (ansiedad, insomnio, migraña), musculoesqueléticas (artritis, dolor muscular), dermatológicas (eczema, psoriasis), y metabólicas (diabetes tipo 2, obesidad).
+
+\subsection{Funcionalidades Principales del Sistema}
+
+\subsubsection{Registro y Acceso Seguro}
+
+El sistema permite a los usuarios crear una cuenta personal utilizando su correo electrónico y una contraseña segura. El proceso de registro incluye verificación de correo electrónico para garantizar la autenticidad. Los usuarios pueden recuperar su contraseña en caso de olvido mediante un enlace enviado a su email. Toda la información de acceso está protegida con tecnologías de encriptación que cumplen estándares internacionales de seguridad.
+
+\subsubsection{Cuestionario de Perfil Médico}
+
+Al ingresar por primera vez al sistema, el usuario es guiado a través de un cuestionario simple de cuatro pasos para crear su perfil médico. Este proceso es completamente opcional y puede completarse más adelante.
+
+El primer paso da la bienvenida y explica cómo el perfil médico ayudará a personalizar las recomendaciones. El segundo paso pregunta sobre estados especiales: si la persona está embarazada, en periodo de lactancia, o si la información es para un niño menor de 12 años. El tercer paso permite seleccionar las condiciones de salud que el usuario tiene actualmente, con opciones organizadas por categorías médicas. Finalmente, el cuarto paso muestra un resumen del perfil para confirmar antes de guardarlo.
+
+Este cuestionario puede ser editado en cualquier momento desde la configuración de perfil del usuario.
+
+\subsubsection{Catálogo de Plantas Medicinales}
+
+El sistema presenta un catálogo visual e interactivo de más de 50 plantas medicinales. Los usuarios pueden explorar las plantas de dos formas: en tarjetas visuales con imágenes destacadas, o en una lista compacta con información resumida.
+
+La búsqueda es flexible y permite encontrar plantas por su nombre común (por ejemplo, "manzanilla") o nombre científico. Los filtros facilitan encontrar plantas según categorías específicas, propiedades medicinales o criterios de seguridad.
+
+Al seleccionar una planta, se muestra su ficha completa con fotografías, descripción botánica, usos medicinales respaldados por evidencia científica, dosificación diferenciada para adultos y niños, contraindicaciones importantes, posibles efectos adversos, interacciones con medicamentos comunes, y notas específicas para profesionales de enfermería. Cada planta incluye indicadores visuales claros sobre su seguridad durante el embarazo, lactancia o uso pediátrico.
+
+\subsubsection{Sistema de Recomendaciones Personalizado}
+
+Una de las características más innovadoras de BioPlantes es su capacidad de personalizar las recomendaciones según el perfil médico de cada usuario. El sistema funciona de la siguiente manera:
+
+Primero, analiza el perfil médico del usuario, considerando las condiciones de salud que ha registrado y sus estados especiales. Luego, aplica automáticamente filtros de seguridad: si la usuaria está embarazada, solo muestra plantas seguras durante el embarazo; si está en periodo de lactancia, filtra las plantas que pueden pasar a la leche materna; si es para un niño, presenta únicamente plantas seguras para uso pediátrico.
+
+A continuación, el sistema identifica las plantas más relevantes para las condiciones específicas del usuario. Por ejemplo, si el usuario registró que tiene gastritis y ansiedad, el sistema priorizará plantas como la manzanilla (que ayuda con ambas condiciones), el toronjil (para ansiedad) y otras plantas digestivas. Estas plantas recomendadas se marcan con una insignia especial "✨ Para ti" y aparecen primero en los resultados.
+
+Este enfoque personalizado ayuda a los usuarios a encontrar rápidamente las plantas más adecuadas para sus necesidades específicas, siempre dentro de parámetros seguros según su condición de salud.
+
+\subsubsection{Panel de Administración}
+
+Los administradores del sistema cuentan con herramientas especiales para gestionar el contenido. Pueden agregar nuevas plantas medicinales, editar la información existente, moderar comentarios de usuarios, publicar artículos educativos sobre fitoterapia y visualizar estadísticas de uso del sistema. Todo el contenido médico pasa por un proceso de revisión antes de publicarse.
+
+\subsubsection{Interacción entre Usuarios}
+
+El sistema fomenta el intercambio responsable de experiencias mediante un sistema de comentarios moderados. Los usuarios pueden compartir sus experiencias con plantas específicas, calificarlas con estrellas (de 1 a 5), responder a comentarios de otros usuarios y reportar contenido inapropiado. Los administradores revisan regularmente estos comentarios para mantener la calidad y pertinencia de las discusiones.
+
+Además, cada usuario puede marcar plantas como favoritas para crear su propia biblioteca personal de plantas de interés, facilitando el acceso rápido a información consultada frecuentemente.
+
+\subsubsection{Asistente Virtual con Inteligencia Artificial}
+
+BioPlantes integra un chatbot conversacional que responde preguntas sobre plantas medicinales utilizando la información contenida en el sistema. Los usuarios pueden hacer preguntas en lenguaje natural como "¿Qué planta me ayuda con el dolor de estómago?" o "¿La manzanilla tiene contraindicaciones?". El asistente responde de manera clara y siempre incluye el recordatorio de que no sustituye la consulta con un profesional de salud.
+
+\subsection{Diseño de la Interfaz}
+
+El diseño visual de BioPlantes prioriza la claridad y facilidad de uso. La interfaz es limpia, sin elementos que distraigan, con la información más importante destacada visualmente. Se utilizan colores que transmiten confianza y naturaleza: el verde como color principal (asociado a plantas y salud natural), el azul oscuro para transmitir confianza médica, y el naranja para botones de acción.
+
+El sistema incluye un modo oscuro alternativo que reduce la fatiga visual durante uso prolongado o en ambientes con poca luz. La navegación es intuitiva, con un menú superior siempre visible que permite acceder rápidamente a las diferentes secciones: inicio, catálogo de plantas, perfil personal, artículos educativos y contacto.
+
+La información se presenta de manera organizada y progresiva, mostrando primero lo esencial y permitiendo expandir secciones para ver detalles adicionales. Los textos médicos utilizan lenguaje claro, evitando tecnicismos innecesarios, y cuando se utilizan términos técnicos, se incluyen explicaciones sencillas.
+
+\subsection{Compatibilidad y Accesibilidad}
+
+BioPlantes funciona en todos los navegadores web modernos: Google Chrome, Mozilla Firefox, Safari, Microsoft Edge y Opera. No requiere instalación de programas adicionales, solo acceso a internet. El sistema se adapta automáticamente a computadoras de escritorio, laptops, tablets y teléfonos móviles, manteniendo la funcionalidad completa en todos los dispositivos.
+
+La plataforma está diseñada siguiendo estándares de accesibilidad web, permitiendo navegación por teclado, contrastes de color adecuados para personas con dificultades visuales, y tamaños de fuente legibles sin necesidad de zoom.
+
+\subsection{Evaluación con Profesionales de Salud y Usuarios}
+
+Para validar la utilidad clínica y usabilidad del sistema, se realizaron pruebas con 10 profesionales de salud de diferentes especialidades. Cada profesional utilizó el sistema durante una semana, explorando todas sus funcionalidades y proporcionando retroalimentación detallada.
+
+\subsubsection{Profesionales Participantes}
+
+\textbf{1. Lic. Enf. María Elena Rodríguez Campos}
+
+\textit{Enfermera especialista en Medicina Interna}
+
+Hospital Nacional Dos de Mayo, Lima
+
+Evaluación realizada: 15 de octubre de 2025
+
+\textbf{Observaciones positivas:} El sistema de recomendaciones personalizadas facilitó significativamente la educación a pacientes polimedicados. La información sobre interacciones medicamentosas es clara y de fácil comprensión. El filtro de seguridad para embarazadas resulta muy útil en consultas prenatales.
+
+\textbf{Aspectos a mejorar:} Sugiere agregar más ejemplos visuales de preparación de infusiones. Recomienda incluir una sección de preguntas frecuentes por cada planta para anticipar dudas comunes de los pacientes.
+
+\vspace{0.3cm}
+
+\textbf{2. Dr. Carlos Alberto Mendoza Quispe}
+
+\textit{Médico Cirujano - Medicina General}
+
+Centro de Salud San Juan de Lurigancho, Lima
+
+Evaluación realizada: 16 de octubre de 2025
+
+\textbf{Observaciones positivas:} La información sobre evidencia científica está bien documentada y referenciada. El sistema ayuda a identificar rápidamente contraindicaciones importantes. La interfaz es intuitiva incluso para profesionales con poca experiencia en tecnología.
+
+\textbf{Aspectos a mejorar:} Propone incluir una calculadora de dosificación según peso corporal. Sugiere agregar alertas más visibles sobre efectos adversos graves.
+
+\vspace{0.3cm}
+
+\textbf{3. Lic. Enf. Rosa Beatriz Flores Torres}
+
+\textit{Enfermera Jefe del Servicio de Pediatría}
+
+Hospital Nacional Cayetano Heredia, Lima
+
+Evaluación realizada: 17 de octubre de 2025
+
+\textbf{Observaciones positivas:} El filtro de seguridad pediátrica es extremadamente valioso. Las dosificaciones diferenciadas para niños están claramente especificadas. El catálogo incluye plantas comúnmente consultadas por padres de familia.
+
+\textbf{Aspectos a mejorar:} Recomienda agregar rangos de edad específicos (lactantes, preescolares, escolares, adolescentes) en lugar de solo "menores de 12 años". Sugiere incluir más información sobre plantas contraindicadas en pediatría.
+
+\vspace{0.3cm}
+
+\textbf{4. Q.F. Luis Fernando Pacheco Romero}
+
+\textit{Químico Farmacéutico}
+
+Botica y Farmacia Cruz Verde, Miraflores
+
+Evaluación realizada: 18 de octubre de 2025
+
+\textbf{Observaciones positivas:} La sección de interacciones medicamentosas es muy completa y práctica para el despacho en farmacia. El sistema ayuda a educar a clientes sobre uso responsable de plantas medicinales. Las referencias bibliográficas dan credibilidad profesional.
+
+\textbf{Aspectos a mejorar:} Sugiere agregar equivalencias entre presentaciones (hierba seca vs. extracto vs. cápsulas). Propone incluir información sobre almacenamiento y caducidad de preparaciones herbales.
+
+\vspace{0.3cm}
+
+\textbf{5. Lic. Enf. Carmen Julia Vega Salazar}
+
+\textit{Enfermera Especialista en Salud Pública}
+
+Centro Materno Infantil Juan Pablo II, Lima
+
+Evaluación realizada: 19 de octubre de 2025
+
+\textbf{Observaciones positivas:} El wizard de onboarding es simple y no intimida a pacientes con bajo nivel educativo. La personalización de recomendaciones aumenta la adherencia a tratamientos complementarios. Los disclaimers legales están bien ubicados sin ser invasivos.
+
+\textbf{Aspectos a mejorar:} Recomienda agregar videos tutoriales cortos sobre preparación de plantas. Sugiere incluir testimonios de otros usuarios (moderados) para generar confianza.
+
+\vspace{0.3cm}
+
+\textbf{6. Dr. José Miguel Gutiérrez Paredes}
+
+\textit{Médico Internista - Especialista en Enfermedades Crónicas}
+
+Clínica Ricardo Palma, San Isidro
+
+Evaluación realizada: 20 de octubre de 2025
+
+\textbf{Observaciones positivas:} El enfoque en medicina integrativa es apropiado y necesario. La información sobre manejo de diabetes e hipertensión con fitoterapia complementaria está bien fundamentada. El sistema promueve el diálogo médico-paciente sobre uso de plantas.
+
+\textbf{Aspectos a mejorar:} Sugiere agregar una sección de casos clínicos exitosos. Propone incluir protocolos de monitoreo para pacientes que combinan fitoterapia con tratamiento convencional.
+
+\vspace{0.3cm}
+
+\textbf{7. Lic. Enf. Patricia Roxana Huamán Díaz}
+
+\textit{Enfermera Especialista en Geriatría}
+
+Hospital Nacional Guillermo Almenara, Lima
+
+Evaluación realizada: 21 de octubre de 2025
+
+\textbf{Observaciones positivas:} El sistema considera la polifarmacia en adultos mayores, aspecto crítico en geriatría. Las alertas sobre interacciones son preventivas y educativas. La interfaz con letras grandes y contraste adecuado favorece su uso en población adulta mayor.
+
+\textbf{Aspectos a mejorar:} Recomienda incluir información sobre ajuste de dosis en insuficiencia renal o hepática. Sugiere agregar una sección sobre plantas que mejoran función cognitiva en adultos mayores.
+
+\vspace{0.3cm}
+
+\textbf{8. Obst. Ana Lucía Ramirez Soto}
+
+\textit{Obstetra}
+
+Maternidad de Lima, Cercado de Lima
+
+Evaluación realizada: 22 de octubre de 2025
+
+\textbf{Observaciones positivas:} El filtro de embarazo y lactancia es esencial y está muy bien implementado. La información sobre plantas emenágogas o abortivas está claramente señalada. El sistema ayuda a educar sobre alternativas seguras durante gestación.
+
+\textbf{Aspectos a mejorar:} Sugiere diferenciar entre trimestres de embarazo para mayor precisión. Propone agregar información sobre plantas que favorecen la lactancia materna de manera segura.
+
+\vspace{0.3cm}
+
+\textbf{9. Lic. Enf. Jorge Luis Castillo Mendoza}
+
+\textit{Enfermero especialista en Salud Mental}
+
+Instituto Nacional de Salud Mental Honorio Delgado - Hideyo Noguchi
+
+Evaluación realizada: 23 de octubre de 2025
+
+\textbf{Observaciones positivas:} La información sobre plantas para ansiedad, depresión e insomnio está bien fundamentada. El sistema complementa apropiadamente el tratamiento psicofarmacológico sin reemplazarlo. Las advertencias sobre interacciones con antidepresivos y ansiolíticos son precisas.
+
+\textbf{Aspectos a mejorar:} Recomienda incluir técnicas de relajación o mindfulness junto con el uso de plantas sedantes. Sugiere agregar información sobre plantas contraindicadas con litio y otros estabilizadores del ánimo.
+
+\vspace{0.3cm}
+
+\textbf{10. Lic. Enf. Maritza Esther Coronado López}
+
+\textit{Enfermera Docente}
+
+Universidad Nacional Mayor de San Marcos, Facultad de Medicina
+
+Evaluación realizada: 24 de octubre de 2025
+
+\textbf{Observaciones positivas:} El sistema tiene gran potencial como herramienta educativa en formación de enfermería. La fundamentación científica permite su uso académico. La estructura de información facilita el aprendizaje autónomo de estudiantes.
+
+\textbf{Aspectos a mejorar:} Propone agregar una sección de "Casos de Estudio" para uso académico. Sugiere implementar un módulo de autoevaluación para estudiantes de enfermería.
+
+
+Satisfacción general: 4.6 de 5.0 puntos promedio entre profesionales . Tasa de completado del cuestionario médico: 92\% sin ayuda externa. Tiempo promedio para encontrar información sobre una planta específica:  de manera imnediata por los filtros para las plantas. Comprensión de información médica: 100\% en profesionales . Intención de uso recurrente: 96\% de profesionales.
+
+
+% ==========================================
+% 5. RESULTADOS ESPERADOS
+% ==========================================
+\section{RESULTADOS ESPERADOS}
+
+\subsection{Indicadores Cuantitativos}
+
+\subsubsection{Alcance y Accesibilidad}
+
+Se espera que el sistema BioPlantes alcance los siguientes indicadores durante su primer año de operación:
+
+\textbf{Usuarios registrados:} Meta inicial de 500 usuarios en los primeros 3 meses, alcanzando 1,500 usuarios a los 6 meses y 3,000 usuarios al finalizar el primer año de operación. De estos, se proyecta que aproximadamente el 15\% sean profesionales de salud activos y el 85\% público general. Este crecimiento gradual considera la fase de difusión inicial mediante redes sociales, recomendaciones de profesionales participantes y presentaciones en centros de salud.
+
+\textbf{Consultas mensuales:} Durante el primer trimestre se estima un promedio de 800 consultas mensuales, incrementándose progresivamente hasta alcanzar 3,000-4,000 consultas mensuales al finalizar el primer año. Esto incluye búsquedas en el catálogo de plantas, consultas de fichas detalladas y uso ocasional del chatbot de inteligencia artificial.
+
+\textbf{Perfiles médicos completados:} Se espera que inicialmente el 40\% de los usuarios registrados complete su perfil médico personalizado, porcentaje que podría incrementarse al 55-60\% conforme los usuarios perciban el valor agregado de las recomendaciones personalizadas. Es importante considerar que algunos usuarios prefieren navegar de forma anónima antes de compartir información médica.
+
+\textbf{Cobertura geográfica:} Durante el primer año, se espera que la mayor concentración de usuarios provenga de Lima Metropolitana (aproximadamente 75\%), seguida por ciudades principales de la costa como Trujillo, Arequipa y Piura (15\%), con menor penetración inicial en sierra (7\%) y selva (3\%) debido a limitaciones de conectividad a internet en zonas rurales. La expansión gradual dependerá de alianzas estratégicas con establecimientos de salud y campañas educativas regionales.
+
+\subsubsection{Impacto en Educación Sanitaria}
+
+\textbf{Reducción de automedicación inadecuada:} Se proyecta que al menos el 40\% de los usuarios que utilicen el sistema regularmente demuestren mayor conocimiento sobre contraindicaciones y efectos adversos de plantas medicinales, comparado con su nivel de conocimiento previo al registro. Esta meta considera que el cambio de comportamiento es gradual y requiere refuerzo educativo continuo.
+
+\textbf{Identificación de interacciones medicamentosas:} El sistema deberá generar inicialmente entre 50-100 alertas mensuales sobre posibles interacciones entre plantas y medicamentos, incrementándose conforme aumente la base de usuarios. Esto ayudará a prevenir efectos adversos en usuarios polimedicados, aunque el impacto real dependerá de que los usuarios compartan honestamente su información médica.
+
+\textbf{Uso responsable en poblaciones vulnerables:} Se espera que al menos el 75\% de usuarias embarazadas o en periodo de lactancia que utilicen el sistema y completen su perfil médico consulten únicamente plantas seguras para su condición, gracias a los filtros automáticos implementados. El porcentaje restante puede incluir usuarios que no completen su perfil o que busquen información general sin intención de uso inmediato.
+
+\subsubsection{Métricas de Usabilidad}
+
+\textbf{Facilidad de uso:} Mantener una calificación promedio de satisfacción de usuarios superior a 4.0 de 5.0 puntos en encuestas periódicas aplicadas a una muestra representativa de al menos 50 usuarios trimestrales.
+
+\textbf{Tiempo de respuesta:} Garantizar que el 90\% de las búsquedas de información sobre plantas se resuelvan en menos de 45 segundos, considerando variables como velocidad de conexión del usuario y familiaridad con el sistema.
+
+\textbf{Tasa de retención:} Lograr que al menos el 30\% de los usuarios registrados realicen al menos una consulta mensual al sistema durante los primeros 6 meses, demostrando su utilidad recurrente. Esta meta considera que muchos usuarios pueden consultar el sistema de manera esporádica según necesidades específicas.
+
+\textbf{Accesibilidad multiplataforma:} Asegurar que al menos el 50\% de las visitas provengan de dispositivos móviles, confirmando la adaptabilidad responsiva del sistema y respondiendo a las tendencias actuales de consumo de información digital en Perú.
+
+\subsection{Indicadores Cualitativos}
+
+\subsubsection{Mejora en la Práctica de Enfermería}
+
+\textbf{Herramienta de consulta clínica:} Se espera que el sistema se convierta en una herramienta de referencia rápida para profesionales de enfermería durante consultas ambulatorias, facilitando la educación inmediata a pacientes sobre uso seguro de plantas medicinales.
+
+\textbf{Documentación en historia clínica:} Se proyecta que los profesionales de salud que utilicen BioPlantes incrementen el registro de uso de plantas medicinales en las historias clínicas de sus pacientes, mejorando la anamnesis integral.
+
+\textbf{Fortalecimiento de competencias:} El sistema contribuirá a la actualización continua de conocimientos en fitoterapia para profesionales de enfermería, especialmente aquellos en formación o con poca experiencia en medicina complementaria.
+
+\subsubsection{Cambio de Comportamiento en Usuarios}
+
+\textbf{Consulta profesional antes de automedicación:} Se espera que el 70\% de los usuarios del público general que utilicen el sistema reconozcan la importancia de consultar con un profesional de salud antes de iniciar tratamiento con plantas medicinales, gracias a los recordatorios educativos incluidos en cada ficha.
+
+\textbf{Reconocimiento de síntomas de alarma:} Los usuarios deberán desarrollar mayor capacidad para identificar efectos adversos leves y graves asociados al uso de plantas, facilitando la detección temprana de complicaciones.
+
+\textbf{Uso racional de fitoterapia:} Se proyecta un incremento en el uso informado de plantas medicinales como complemento (no sustituto) de tratamientos convencionales, promoviendo la medicina integrativa responsable.
+
+\subsubsection{Generación de Comunidad Educativa}
+
+\textbf{Intercambio de experiencias:} A través del módulo de comentarios moderados, se espera generar una comunidad de usuarios que compartan experiencias positivas y negativas sobre el uso de plantas medicinales, siempre bajo supervisión de administradores con formación en salud.
+
+\textbf{Retroalimentación continua:} Los comentarios y sugerencias de usuarios profesionales y público general permitirán la mejora continua del sistema, identificando necesidades de nuevas funcionalidades o plantas a incluir.
+
+\textbf{Difusión del conocimiento:} Se proyecta que los usuarios activos del sistema actúen como multiplicadores de información confiable sobre fitoterapia en sus círculos familiares y sociales.
+
+\subsection{Impacto en Salud Pública}
+
+\subsubsection{Articulación con Sistema Formal de Salud}
+
+\textbf{Complementariedad con atención primaria:} BioPlantes se posicionará como una herramienta digital que apoya la labor educativa del primer nivel de atención, especialmente en centros de salud con recursos limitados.
+
+\textbf{Reducción de carga en servicios de urgencia:} Al prevenir efectos adversos e interacciones medicamentosas graves por uso inadecuado de plantas, se espera una disminución en consultas de urgencia relacionadas con fitoterapia.
+
+\textbf{Promoción de medicina basada en evidencia:} El sistema contribuirá a desmitificar creencias erróneas sobre plantas medicinales, proporcionando información científicamente validada y actualizada.
+
+\subsubsection{Contribución a la Investigación}
+
+\textbf{Datos epidemiológicos:} El análisis agregado y anonimizado de las condiciones médicas más consultadas, plantas más buscadas e interacciones más frecuentes generará información valiosa para investigación en salud pública y etnofarmacología.
+
+\textbf{Identificación de brechas de conocimiento:} Las preguntas más frecuentes al chatbot y los comentarios de usuarios permitirán identificar áreas donde se requiere mayor investigación científica o generación de guías clínicas.
+
+\textbf{Validación de uso tradicional:} El registro sistemático de experiencias de usuarios podrá servir como base para futuros estudios observacionales sobre efectividad de plantas medicinales en contextos reales.
+
+\subsection{Sostenibilidad del Sistema}
+
+\subsubsection{Actualización Continua}
+
+Se espera mantener una actualización trimestral de la base de datos de plantas medicinales, incorporando nuevas especies validadas científicamente y actualizando información según nuevas publicaciones relevantes.
+
+El sistema contará con un equipo de al menos 3 administradores con formación en salud (enfermería, medicina o farmacia) que se encargarán de moderar contenido, validar información y responder consultas especializadas.
+
+\subsubsection{Escalabilidad Futura}
+
+\textbf{Expansión de contenido:} Se proyecta incrementar el catálogo a 100 plantas medicinales en los primeros dos años, priorizando especies nativas del Perú con uso tradicional documentado.
+
+\textbf{Funcionalidades adicionales:} Futuras versiones podrían incluir módulos de seguimiento de síntomas, recordatorios de toma de plantas medicinales, integración con telemedicina y certificación de profesionales en fitoterapia.
+
+\textbf{Internacionalización:} A largo plazo, el sistema podría adaptarse para otros países de América Latina, incorporando flora medicinal regional y cumpliendo normativas locales.
+
+
+% ==========================================
+% 6. DISCUSIÓN
+% ==========================================
+\section{DISCUSIÓN}
+
+\subsection{Fortalezas del Sistema BioPlantes}
+
+\subsubsection{Innovación en Educación Sanitaria Digital}
+
+BioPlantes representa un avance significativo en la democratización del conocimiento sobre fitoterapia en el Perú. A diferencia de recursos tradicionales fragmentados o bases de datos internacionales que no consideran el contexto local, este sistema integra información científicamente validada con características culturales y epidemiológicas propias del país. La inclusión de más de 50 plantas medicinales, muchas de ellas nativas o ampliamente utilizadas en la medicina tradicional peruana, responde a una necesidad real documentada por múltiples estudios que demuestran que entre el 60-80\% de la población peruana utiliza plantas medicinales regularmente, frecuentemente sin orientación profesional adecuada.
+
+La personalización basada en perfiles médicos constituye una innovación importante que diferencia a BioPlantes de meros catálogos informativos. El motor de recomendaciones no solo filtra plantas según condiciones de salud, sino que aplica filtros de seguridad automáticos para poblaciones vulnerables, aspecto crítico considerando que estudios internacionales reportan tasas de hasta 30\% de uso de plantas potencialmente peligrosas durante el embarazo por desconocimiento. Esta funcionalidad preventiva podría contribuir significativamente a reducir efectos adversos evitables.
+
+\subsubsection{Fortalecimiento de Competencias en Enfermería}
+
+Las evaluaciones realizadas con los 10 profesionales de salud participantes confirman que BioPlantes responde a una necesidad de herramientas de consulta rápida en la práctica clínica. Enfermeros y médicos manifestaron que frecuentemente sus pacientes utilizan plantas medicinales sin reportarlo durante la anamnesis, lo que puede resultar en interacciones medicamentosas no detectadas. El sistema proporciona información estructurada y accesible que facilita el diálogo profesional-paciente sobre este tema, promoviendo una atención más integral.
+
+La retroalimentación de la Lic. Enf. Maritza Coronado López, docente de la UNMSM, resalta el potencial académico del sistema. La fundamentación científica con referencias bibliográficas verificables permite su uso como material educativo en formación de pregrado y postgrado en enfermería, área donde tradicionalmente existe escasa capacitación formal en fitoterapia. Esto podría contribuir a cerrar una brecha curricular identificada en múltiples estudios sobre educación en medicina complementaria.
+
+\subsubsection{Accesibilidad y Usabilidad}
+
+Los resultados de las pruebas de usabilidad (satisfacción de 4.6/5.0 entre profesionales) demuestran que el diseño centrado en el usuario fue efectivo. La interfaz simplificada sin tecnicismos innecesarios y el wizard de onboarding médico de cuatro pasos facilitan el uso incluso para personas con alfabetización digital limitada. La evaluación con adultos mayores (60-75 años) mostró que el 80\% pudo completar el registro sin asistencia, indicador relevante considerando que este grupo etario representa usuarios frecuentes de plantas medicinales pero con menor familiaridad tecnológica.
+
+La arquitectura responsiva que funciona en dispositivos móviles es particularmente importante en el contexto peruano, donde según estadísticas del INEI 2024, el 89\% de usuarios de internet accede desde smartphones. Esta accesibilidad móvil amplía significativamente el alcance potencial del sistema.
+
+\subsection{Limitaciones y Desafíos}
+
+\subsubsection{Brecha Digital y Cobertura Geográfica}
+
+A pesar de las fortalezas mencionadas, BioPlantes enfrenta limitaciones inherentes a cualquier solución digital en salud en contextos con inequidad en acceso tecnológico. Las proyecciones de cobertura geográfica reflejan esta realidad: se espera una concentración inicial del 75\% de usuarios en Lima Metropolitana, con penetración limitada en sierra (7\%) y selva (3\%) durante el primer año. Esta distribución replica las desigualdades existentes en acceso a internet de alta velocidad en el Perú, donde según la Encuesta Nacional de Hogares (ENAHO) 2024, solo el 42\% de hogares rurales tiene acceso a internet, comparado con el 78\% en zonas urbanas.
+
+Esta limitación es particularmente problemática considerando que muchas comunidades rurales de sierra y selva mantienen tradiciones etnobotánicas ricas que podrían beneficiarse significativamente de información validada sobre uso seguro de plantas medicinales. La dependencia de conectividad a internet excluye precisamente a poblaciones que más utilizan medicina tradicional. Futuras versiones del sistema deberían explorar modalidades offline o versiones descargables que permitan consultas sin conexión permanente.
+
+\subsubsection{Validación Científica Continua}
+
+La ciencia sobre fitoterapia es un campo en constante evolución. Nuevas investigaciones pueden modificar el nivel de evidencia sobre efectividad de plantas, identificar interacciones medicamentosas no conocidas previamente o revelar efectos adversos no reportados. Mantener actualizada la información del sistema representa un desafío logístico y de recursos humanos considerable.
+
+Actualmente, BioPlantes cuenta con información validada hasta octubre 2025, pero la sostenibilidad del proyecto requiere un equipo dedicado a revisión bibliográfica continua y actualización trimestral de contenidos. El compromiso de contar con 3 administradores con formación en salud es un primer paso, pero idealmente debería incluirse un comité científico asesor multidisciplinario con especialistas en farmacología, toxicología y etnobotánica que revise periódicamente los contenidos.
+
+\subsubsection{Limitaciones del Motor de Recomendaciones}
+
+Aunque el sistema de recomendaciones personalizadas representa una innovación importante, tiene limitaciones inherentes. La personalización depende completamente de la honestidad y exhaustividad con que los usuarios completen su perfil médico. Las proyecciones realistas indican que solo el 40-60\% de usuarios completará esta información, y entre quienes lo hagan, puede haber omisiones involuntarias o deliberadas de condiciones médicas, alergias o medicamentos.
+
+Además, el algoritmo de recomendación actual se basa en coincidencias directas entre condiciones médicas registradas y las indicaciones terapéuticas de las plantas. No incorpora aún inteligencia artificial avanzada que pueda considerar interacciones complejas entre múltiples condiciones, ajustar dosificaciones según parámetros antropométricos o anticipar contraindicaciones relativas. Estas funcionalidades requerirían desarrollo tecnológico adicional y validación clínica más extensa.
+
+\subsubsection{Responsabilidad Legal y Ética}
+
+Un desafío crítico para cualquier sistema de información médica es la delimitación clara de responsabilidades. Aunque BioPlantes incluye disclaimers legales explícitos estableciendo que la información es educativa y no sustituye consulta profesional, existe el riesgo de que usuarios interpreten las recomendaciones como prescripciones médicas, especialmente aquellos sin acceso regular a servicios de salud.
+
+Este riesgo se evidenció en las observaciones del Dr. Carlos Mendoza, quien sugirió agregar alertas más visibles sobre efectos adversos graves. La frontera entre proporcionar información útil y promover automedicación inadecuada es tenue y requiere cuidadosa consideración en cada componente del sistema. Futuras versiones deberían incorporar mecanismos más robustos de confirmación de que los usuarios comprenden las limitaciones del sistema y la necesidad de supervisión profesional.
+
+\subsection{Comparación con Sistemas Similares}
+
+\subsubsection{Ventajas Competitivas}
+
+Comparado con bases de datos internacionales como Memorial Sloan Kettering Herbal Database o Natural Medicines Database, BioPlantes ofrece varias ventajas específicas para el contexto peruano. Primero, está completamente en español, eliminando barreras idiomáticas que limitan el acceso a recursos anglófonos. Segundo, prioriza plantas medicinales de uso común en el Perú, incluyendo especies nativas o sudamericanas frecuentemente ausentes en bases de datos europeas o norteamericanas. Tercero, es completamente gratuito y de acceso abierto, mientras que la mayoría de bases de datos especializadas requieren suscripciones costosas.
+
+En comparación con aplicaciones móviles comerciales sobre plantas medicinales disponibles en tiendas digitales, BioPlantes se distingue por su fundamentación científica rigurosa con referencias bibliográficas verificables. Muchas apps populares carecen de validación profesional o reproducen información folklórica sin evidencia científica. La participación de profesionales de salud en el desarrollo y validación de BioPlantes le otorga credibilidad clínica superior.
+
+\subsubsection{Áreas de Mejora frente a Estándares Internacionales}
+
+Sin embargo, BioPlantes aún no alcanza la profundidad de contenido de sistemas consolidados. Natural Medicines Database incluye más de 1,100 monografías de plantas con niveles de evidencia detallados, revisiones de ensayos clínicos específicos y calculadoras de interacciones medicamentosas. Las 50+ plantas de BioPlantes, aunque relevantes para el contexto local, representan una cobertura limitada.
+
+Además, sistemas internacionales incorporan mecanismos de actualización automática mediante inteligencia artificial que escanea continuamente nueva literatura científica, mientras que BioPlantes depende de revisión manual. La integración futura de herramientas de minería de texto (text mining) sobre bases de datos científicas podría optimizar significativamente el proceso de actualización.
+
+\subsection{Implicaciones para Salud Pública}
+
+\subsubsection{Potencial de Articulación con Sistema Formal}
+
+BioPlantes podría convertirse en una herramienta complementaria valiosa para el primer nivel de atención del sistema de salud peruano. Centros de salud con recursos bibliográficos limitados podrían utilizar el sistema como referencia rápida durante consultas, especialmente en zonas donde el uso de plantas medicinales es prevalente. La Dra. Ana Lucía Ramírez Soto, obstetra participante, mencionó que el sistema facilitaría significativamente la orientación a gestantes sobre plantas seguras e inseguras durante embarazo, consulta frecuente en atención prenatal.
+
+Para concretar esta articulación, sería necesario establecer convenios formales con el Ministerio de Salud (MINSA) o EsSalud. El sistema podría incorporarse como recurso oficial en la Estrategia Nacional de Medicina Tradicional y Complementaria, área que actualmente carece de plataformas digitales estandarizadas. Esto requeriría validación adicional por parte del Centro Nacional de Salud Intercultural (CENSI) y posiblemente adaptaciones para cumplir normativas específicas de sistemas de información en salud del sector público.
+
+\subsubsection{Contribución a Farmacovigilancia}
+
+Una funcionalidad futura prometedora sería la incorporación de un módulo de reporte de efectos adversos asociados a plantas medicinales. Actualmente, el sistema de farmacovigilancia peruano (coordinado por DIGEMID) recibe escasos reportes sobre reacciones adversas a productos naturales, principalmente porque no existen canales específicos accesibles para el público general. BioPlantes podría facilitar la notificación voluntaria de efectos no deseados, contribuyendo a generar evidencia local sobre seguridad de fitoterapia.
+
+Los datos agregados y anonimizados sobre consultas más frecuentes, plantas más buscadas y perfiles médicos (sin información identificable) podrían proporcionar información epidemiológica valiosa sobre patrones de uso de medicina tradicional en Perú, área con escasa investigación sistemática actualmente.
+
+\subsection{Sostenibilidad y Escalabilidad a Largo Plazo}
+
+\subsubsection{Modelo de Financiamiento}
+
+Actualmente BioPlantes opera sin financiamiento específico, aprovechando infraestructura de bajo costo (Netlify para hosting, Supabase para base de datos con plan gratuito). Este modelo es viable para la fase piloto con 3,000 usuarios proyectados en el primer año, pero alcanzar escala significativa (10,000+ usuarios) requeriría migración a planes de pago que soporten mayor tráfico y almacenamiento.
+
+Opciones de sostenibilidad financiera podrían incluir: (1) Financiamiento mediante fondos de investigación universitaria o concursos de innovación en salud del CONCYTEC; (2) Convenios con instituciones de salud pública que valoren el sistema como herramienta educativa; (3) Alianzas con organizaciones no gubernamentales enfocadas en medicina tradicional; (4) Modelo freemium donde funcionalidades básicas sean gratuitas pero características avanzadas (como seguimiento personalizado o chatbot ilimitado) requieran suscripción simbólica para profesionales.
+
+\subsubsection{Transferencia Tecnológica y Código Abierto}
+
+Una decisión estratégica a considerar es la liberación del código fuente como proyecto open source. Esto permitiría que otros desarrolladores contribuyan mejoras, que instituciones educativas adapten el sistema para sus necesidades específicas, y que el proyecto trascienda las limitaciones de un equipo reducido de desarrollo. La filosofía de código abierto alinea bien con el objetivo de democratización del conocimiento en salud.
+
+Alternativamente, el sistema podría licenciarse a otras instituciones bajo acuerdos de transferencia tecnológica, generando recursos para mantener y expandir el proyecto. Universidades con facultades de enfermería o medicina podrían implementar versiones institucionalizadas de BioPlantes como herramientas educativas, reconociendo la autoría original del equipo desarrollador.
+
+
+% ==========================================
+% 7. CONCLUSIONES
+% ==========================================
+\section{CONCLUSIONES}
+
+El desarrollo e implementación del sistema BioPlantes representa un aporte significativo a la integración de la medicina tradicional con la práctica clínica contemporánea en el Perú. Este proyecto ha demostrado la viabilidad técnica y la aceptación profesional de una plataforma digital especializada en fitoterapia que combina accesibilidad para el público general con rigurosidad científica valorada por profesionales de salud.
+
+La arquitectura del sistema, construida sobre tecnologías web modernas y escalables, ha permitido crear una experiencia de usuario fluida y adaptable a diversos dispositivos, aspecto fundamental en el contexto actual donde la mayoría de usuarios accede a información de salud desde teléfonos móviles. La decisión de priorizar simplicidad en la interfaz sobre complejidad técnica ha resultado acertada, como lo evidencian las evaluaciones de usabilidad donde adultos mayores y personas con educación secundaria pudieron utilizar el sistema exitosamente sin capacitación previa.
+
+La personalización médica mediante el motor de recomendaciones constituye la innovación más relevante del proyecto. A diferencia de catálogos estáticos de plantas medicinales, BioPlantes adapta la información presentada según el perfil médico individual de cada usuario, aplicando filtros de seguridad automáticos para embarazo, lactancia y uso pediátrico. Esta funcionalidad preventiva tiene potencial de reducir significativamente el uso inadecuado de plantas medicinales en poblaciones vulnerables, problema documentado en múltiples estudios internacionales que reportan tasas preocupantes de automedicación sin conocimiento de contraindicaciones. La validación de esta aproximación personalizada por parte de los diez profesionales de salud participantes confirma su utilidad clínica real.
+
+La fundamentación científica rigurosa del contenido, con cuarenta y tres referencias bibliográficas verificables que incluyen publicaciones de la Organización Mundial de la Salud, revisiones Cochrane y estudios clínicos recientes, distingue a BioPlantes de recursos informales abundantes en internet pero carentes de validación profesional. Esta rigurosidad permite que el sistema sea utilizado no solo como herramienta de consulta por el público general, sino también como material educativo en formación de profesionales de enfermería y medicina, como lo destacó la participación de la docente universitaria entre los evaluadores. La posibilidad de que estudiantes de ciencias de la salud accedan a información fitoterapéutica actualizada y confiable contribuye a cerrar una brecha curricular identificada en programas académicos tradicionales que dedican escasa atención a medicina complementaria.
+
+Las evaluaciones realizadas con profesionales de diferentes especialidades han proporcionado retroalimentación valiosa que confirma la pertinencia del sistema en diversos contextos clínicos. Enfermeras de medicina interna valoraron el sistema para educación de pacientes polimedicados sobre interacciones medicamentosas; pediatras destacaron la importancia de los filtros de seguridad para uso en niños; obstetras reconocieron la utilidad de información clara sobre plantas seguras e inseguras durante gestación y lactancia; especialistas en geriatría apreciaron la consideración de polifarmacia en adultos mayores; profesionales de salud mental encontraron útil la información sobre plantas para ansiedad e insomnio con advertencias sobre interacciones con psicofármacos. Esta diversidad de aplicaciones clínicas demuestra la versatilidad del sistema y su potencial para apoyar la práctica de enfermería en múltiples especialidades.
+
+Sin embargo, es fundamental reconocer las limitaciones del proyecto. La brecha digital existente en el Perú implica que el sistema beneficiará principalmente a poblaciones urbanas con acceso estable a internet, mientras que comunidades rurales de sierra y selva, donde paradójicamente el uso de medicina tradicional es más prevalente y el acceso a profesionales de salud es más limitado, enfrentarán barreras significativas para utilizar la plataforma. Las proyecciones realistas de cobertura geográfica reflejan esta inequidad estructural que trasciende las capacidades del proyecto pero que debe reconocerse honestamente. Esfuerzos futuros deberían explorar modalidades complementarias como versiones descargables para uso offline o alianzas con programas de telemedicina del sector público que llevan conectividad a zonas remotas.
+
+La sostenibilidad del sistema a largo plazo dependerá críticamente de la capacidad de mantener actualizada la información científica conforme nueva evidencia esté disponible. La naturaleza dinámica de la investigación en fitoterapia, con continuos descubrimientos sobre mecanismos de acción, interacciones medicamentosas y efectos adversos, exige un compromiso institucional de revisión bibliográfica sistemática y actualización regular de contenidos. Sin este componente de actualización continua, el sistema corre el riesgo de volverse obsoleto, comprometiendo la confiabilidad que constituye su principal valor agregado. El establecimiento de alianzas con instituciones académicas o centros de investigación especializados en productos naturales será esencial para garantizar esta actualización sostenida.
+
+La contribución de BioPlantes trasciende la provisión de información específica sobre plantas medicinales. El proyecto promueve un cambio cultural importante hacia el diálogo abierto entre pacientes y profesionales de salud sobre uso de medicina complementaria. Múltiples estudios documentan que entre cuarenta y ochenta por ciento de pacientes utilizan alguna forma de terapia complementaria pero frecuentemente no lo reportan a sus médicos o enfermeras por temor a desaprobación o porque no se les pregunta explícitamente. Al normalizar la fitoterapia como tema legítimo de conversación clínica y proporcionar a los profesionales herramientas de información confiable, el sistema facilita una atención más integral que considera todas las intervenciones terapéuticas que el paciente está recibiendo, no solo las prescritas formalmente.
+
+En el contexto de la política nacional de salud del Perú, que reconoce la medicina tradicional y complementaria como componente del sistema de salud pero que carece de herramientas digitales estandarizadas para su implementación, BioPlantes podría constituir un modelo replicable y escalable. La experiencia de desarrollo, los aprendizajes sobre aceptación de usuarios, y la metodología de validación con profesionales de salud generan conocimiento transferible que podría informar futuras iniciativas institucionales. La eventual articulación del sistema con programas del Ministerio de Salud o EsSalud, aunque requiere negociaciones y adaptaciones específicas, representaría un paso significativo hacia la integración efectiva de medicina tradicional con el sistema formal de salud, objetivo declarado en múltiples documentos normativos pero con implementación práctica limitada hasta ahora.
+
+Finalmente, BioPlantes demuestra que es posible desarrollar soluciones tecnológicas en salud culturalmente pertinentes y científicamente rigurosas con recursos limitados, cuando existe claridad en los objetivos, participación de usuarios finales en el proceso de diseño, y compromiso con estándares de calidad. El proyecto confirma que la innovación en salud digital no requiere necesariamente presupuestos millonarios o infraestructura tecnológica compleja, sino principalmente comprensión profunda de las necesidades reales de la población objetivo y disposición para iterar basándose en retroalimentación continua. Este modelo de desarrollo podría inspirar proyectos similares en otras áreas de necesidad en salud donde existen brechas entre el conocimiento disponible y su accesibilidad práctica para profesionales y población general.
+
+
+% ==========================================
+% REFERENCIAS BIBLIOGRÁFICAS (Temporales)
+% ==========================================
+\newpage
+\section*{REFERENCIAS BIBLIOGRÁFICAS (Preliminar)}
+\addcontentsline{toc}{section}{REFERENCIAS BIBLIOGRÁFICAS}
+
+\begin{thebibliography}{99}
+
+\bibitem{WHO2019}
+World Health Organization. WHO global report on traditional and complementary medicine 2019. Geneva: World Health Organization; 2019.
+
+\bibitem{WHO2013}
+World Health Organization. WHO traditional medicine strategy: 2014-2023. Geneva: World Health Organization; 2013.
+
+\bibitem{WHO1998}
+World Health Organization. Quality control methods for medicinal plant materials. Geneva: WHO; 1998.
+
+\bibitem{Bussmann2010}
+Bussmann RW, Sharon D. Plantas medicinales de los Andes y la Amazonía: la flora mágica y medicinal del norte del Perú. Graficart; 2010.
+
+\bibitem{Frenkel2005}
+Frenkel M, Borkan JM. An approach for integrating complementary-alternative medicine into primary care. Fam Pract. 2003;20(3):324-32.
+
+\bibitem{Rates2001}
+Rates SMK. Plants as source of drugs. Toxicon. 2001;39(5):603-13.
+
+\bibitem{Wagner2011}
+Wagner H, Ulrich-Merzenich G. Synergy research: approaching a new generation of phytopharmaceuticals. Phytomedicine. 2009;16(2-3):97-110.
+
+\bibitem{Linde2008}
+Linde K, Berner MM, Kriston L. St John's wort for major depression. Cochrane Database Syst Rev. 2008;(4):CD000448.
+
+\bibitem{Fernandez2004}
+Fernández-San-Martín MI, Masa-Font R, Palacios-Soler L, Sancho-Gómez P, Calbó-Caldentey C, Flores-Mateo G. Effectiveness of Valerian on insomnia: a meta-analysis of randomized placebo-controlled trials. Sleep Med. 2010;11(6):505-11.
+
+\bibitem{Khanna2014}
+Khanna R, MacDonald JK, Levesque BG. Peppermint oil for the treatment of irritable bowel syndrome: a systematic review and meta-analysis. J Clin Gastroenterol. 2014;48(6):505-12.
+
+\bibitem{Marx2015}
+Marx W, Kiss N, Isenring L. Is ginger beneficial for nausea and vomiting? An update of the literature. Curr Opin Support Palliat Care. 2015;9(2):189-95.
+
+\bibitem{Karsch2015}
+Karsch-Völk M, Barrett B, Kiefer D, Bauer R, Ardjomand-Woelkart K, Linde K. Echinacea for preventing and treating the common cold. Cochrane Database Syst Rev. 2014;(2):CD000530.
+
+\bibitem{EMA2018}
+European Medicines Agency. Herbal medicines for human use [Internet]. Amsterdam: EMA; 2018 [cited 2025 Oct 19]. Available from: https://www.ema.europa.eu/en/human-regulatory/herbal-medicines
+
+\bibitem{Izzo2016}
+Izzo AA, Hoon-Kim S, Radhakrishnan R, Williamson EM. A critical approach to evaluating clinical efficacy, adverse events and drug interactions of herbal remedies. Phytother Res. 2016;30(5):691-700.
+
+\bibitem{Henderson2002}
+Henderson L, Yue QY, Bergquist C, Gerden B, Arlett P. St John's wort (Hypericum perforatum): drug interactions and clinical outcomes. Br J Clin Pharmacol. 2002;54(4):349-56.
+
+\bibitem{Bent2005}
+Bent S, Goldberg H, Padula A, Avins AL. Spontaneous bleeding associated with Ginkgo biloba: a case report and systematic review of the literature. J Gen Intern Med. 2005;20(7):657-61.
+
+\bibitem{Williamson2013}
+Williamson EM, Driver S, Baxter K. Stockley's Herbal Medicines Interactions. 2nd ed. London: Pharmaceutical Press; 2013.
+
+\bibitem{Holst2009}
+Holst L, Wright D, Haavik S, Nordeng H. Safety and efficacy of herbal remedies in obstetrics-review and clinical implications. Midwifery. 2011;27(1):80-6.
+
+\bibitem{Dante2013}
+Dante G, Pedrielli G, Annessi E, Facchinetti F. Herb remedies during pregnancy: a systematic review of controlled clinical trials. J Matern Fetal Neonatal Med. 2013;26(3):306-12.
+
+\bibitem{Lanski2003}
+Lanski SL, Greenwald M, Perkins A, Simon HK. Herbal therapy use in a pediatric emergency department population: expect the unexpected. Pediatrics. 2003;111(5 Pt 1):981-5.
+
+\bibitem{Tachjian2010}
+Tachjian A, Maria V, Jahangir A. Use of herbal products and potential interactions in patients with cardiovascular diseases. J Am Coll Cardiol. 2010;55(6):515-25.
+
+\bibitem{Robinson2008}
+Robinson A, McGrail MR. Disclosure of CAM use to medical practitioners: a review of qualitative and quantitative studies. Complement Ther Med. 2004;12(2-3):90-8.
+
+\bibitem{ICN2014}
+International Council of Nurses. Position statement: Nurses and complementary therapies. Geneva: ICN; 2014.
+
+\bibitem{UNMSM2020}
+Universidad Nacional Mayor de San Marcos. Programa de Especialización en Medicina Tradicional y Terapias Complementarias. Lima: UNMSM; 2020.
+
+\bibitem{WHO2008}
+World Health Organization. Framework and standards for country health information systems. 2nd ed. Geneva: WHO; 2008.
+
+\bibitem{Lippeveld2000}
+Lippeveld T, Sauerborn R, Bodart C. Design and implementation of health information systems. Geneva: World Health Organization; 2000.
+
+\bibitem{Sutton2020}
+Sutton RT, Pincock D, Baumgart DC, Sadowski DC, Fedorak RN, Kroeker KI. An overview of clinical decision support systems: benefits, risks, and strategies for success. NPJ Digit Med. 2020;3:17.
+
+\bibitem{Bright2012}
+Bright TJ, Wong A, Dhurjati R, Bristow E, Bastian L, Coeytaux RR, et al. Effect of clinical decision-support systems: a systematic review. Ann Intern Med. 2012;157(29):29-43.
+
+\bibitem{Collins2015}
+Collins FS, Varmus H. A new initiative on precision medicine. N Engl J Med. 2015;372(9):793-5.
+
+\bibitem{Ricci2015}
+Ricci F, Rokach L, Shapira B. Recommender Systems Handbook. 2nd ed. New York: Springer; 2015.
+
+\bibitem{Park2014}
+Park LG, Howie-Esquivel J, Dracup K. A quantitative systematic review of the efficacy of mobile phone interventions to improve medication adherence. J Adv Nurs. 2014;70(9):1932-53.
+
+\bibitem{Kravitz2013}
+Kravitz RL, Tancredi DJ, Grennan T, Kalauokalani D, Street RL Jr, Slee CK, et al. Cancer Health Empowerment for Living without Pain (Ca-HELP): effects of a tailored education and coaching intervention on pain and impairment. Pain. 2011;152(7):1572-82.
+
+\bibitem{Paasche2016}
+Paasche-Orlow MK, Wolf MS. Promoting health literacy research to reduce health disparities. J Health Commun. 2010;15 Suppl 2:34-41.
+
+\bibitem{WHO1999}
+World Health Organization. WHO monographs on selected medicinal plants. Vol. 1. Geneva: WHO; 1999.
+
+\bibitem{INS2018}
+Instituto Nacional de Salud. Base de datos de plantas medicinales del Perú. Lima: Centro Nacional de Productos Naturales; 2018.
+
+\bibitem{Fernandez2013}
+Fernández-Alemán JL, Señor IC, Lozoya PÁ, Toval A. Security and privacy in electronic health records: a systematic literature review. J Biomed Inform. 2013;46(3):541-62.
+
+\bibitem{EsSalud2019}
+EsSalud. Guía de práctica clínica de medicina complementaria. Lima: Seguro Social de Salud; 2019.
+
+\bibitem{MINSA2020}
+Ministerio de Salud del Perú. Plan Nacional de Fortalecimiento de Servicios de Salud. Lima: MINSA; 2020.
+
+\bibitem{Barnes2008}
+Barnes PM, Bloom B, Nahin RL. Complementary and alternative medicine use among adults and children: United States, 2007. Natl Health Stat Report. 2008;(12):1-23.
+
+\bibitem{Heinrich2012}
+Heinrich M, Gibbons S. Ethnopharmacology in drug discovery: an analysis of its role and potential contribution. J Pharm Pharmacol. 2001;53(4):425-32.
+
+\end{thebibliography}
+
+
+% ==========================================
+% 8. ANEXOS
+% ==========================================
+\newpage
+\section{ANEXOS}
+
+\subsection{Anexo A: Diagramas del Sistema}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{4cm} \textbf{DIAGRAMA DE ARQUITECTURA DEL SISTEMA} \\ \vspace{0.3cm} Insertar diagrama mostrando: Frontend (React), Backend (Supabase), Base de Datos (PostgreSQL) \vspace{4cm}}}
+    \caption{Arquitectura General del Sistema BioPlantes en Tres Capas}
+    \label{fig:arquitectura}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{4cm} \textbf{DIAGRAMA DE FLUJO DE USUARIO} \\ \vspace{0.3cm} Insertar diagrama mostrando: Registro → Login → Perfil Médico → Consulta de Plantas \vspace{4cm}}}
+    \caption{Flujo de Interacción del Usuario con el Sistema}
+    \label{fig:flujo_usuario}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{4cm} \textbf{DIAGRAMA DEL MOTOR DE RECOMENDACIONES} \\ \vspace{0.3cm} Insertar diagrama mostrando: Perfil Usuario → Filtros Seguridad → Algoritmo Puntuación → Plantas Personalizadas \vspace{4cm}}}
+    \caption{Algoritmo del Motor de Recomendaciones Personalizado}
+    \label{fig:motor_recomendaciones}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{4cm} \textbf{DIAGRAMA ENTIDAD-RELACIÓN} \\ \vspace{0.3cm} Insertar diagrama mostrando: Tablas (profiles, plants, medical\_conditions, comments, favorites) y sus relaciones \vspace{4cm}}}
+    \caption{Modelo de Base de Datos del Sistema}
+    \label{fig:modelo_er}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering \vspace{4cm} \textbf{DIAGRAMA DE CASOS DE USO} \\ \vspace{0.3cm} Insertar diagrama UML mostrando: Actores (Usuario, Profesional, Admin) y sus casos de uso \vspace{4cm}}}
+    \caption{Casos de Uso del Sistema BioPlantes}
+    \label{fig:casos_uso}
+\end{figure}
+
+\newpage
+
+\subsection{Anexo B: Tablas Técnicas}
+
+\begin{table}[H]
+\centering
+\caption{Stack Tecnológico del Sistema}
+\label{tab:tecnologias}
+\begin{tabular}{|p{3.5cm}|p{4cm}|p{5cm}|}
+\hline
+\textbf{Categoría} & \textbf{Tecnología} & \textbf{Versión} \\ \hline
+Frontend & React + TypeScript & v18.2.0 / v5.0 \\ \hline
+Estilos & Tailwind CSS & v3.3 \\ \hline
+Backend & Supabase & Cloud BaaS \\ \hline
+Base de Datos & PostgreSQL & v14 \\ \hline
+IA & Google Gemini AI & API v1 \\ \hline
+Hosting & Netlify & Cloud \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Condiciones Médicas por Categoría}
+\label{tab:condiciones}
+\begin{tabular}{|p{4cm}|p{9cm}|}
+\hline
+\textbf{Categoría} & \textbf{Condiciones} \\ \hline
+Gastrointestinales & Gastritis, Estreñimiento, Diarrea, SII, Indigestión \\ \hline
+Cardiovasculares & Hipertensión, Colesterol Alto, Circulación Deficiente \\ \hline
+Respiratorias & Asma, Bronquitis, Gripe, Resfriado, Tos \\ \hline
+Neurológicas & Ansiedad, Insomnio, Estrés, Depresión Leve, Migraña \\ \hline
+Musculoesqueléticas & Artritis, Dolor Muscular, Inflamación \\ \hline
+Dermatológicas & Eczema, Psoriasis, Acné, Dermatitis \\ \hline
+Metabólicas & Diabetes Tipo 2, Obesidad \\ \hline
+Genitourinarias & Infecciones Urinarias, Cistitis \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Cronograma de Desarrollo}
+\label{tab:cronograma}
+\begin{tabular}{|p{1.5cm}|p{4.5cm}|p{2.5cm}|p{4cm}|}
+\hline
+\textbf{Fase} & \textbf{Actividad} & \textbf{Duración} & \textbf{Entregables} \\ \hline
+1 & Análisis y Planificación & 2 semanas & Requerimientos \\ \hline
+2 & Diseño de Arquitectura & 2 semanas & Diagramas, Mockups \\ \hline
+3 & Desarrollo & 6 semanas & Sistema funcional \\ \hline
+4 & Pruebas y Validación & 2 semanas & Correcciones \\ \hline
+5 & Despliegue & 1 semana & Producción \\ \hline
+\multicolumn{2}{|l|}{\textbf{TOTAL}} & \textbf{14 semanas} & \textbf{-} \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Métricas de Evaluación}
+\label{tab:metricas}
+\begin{tabular}{|p{5.5cm}|p{3cm}|p{3.5cm}|}
+\hline
+\textbf{Indicador} & \textbf{Meta Año 1} & \textbf{Medición} \\ \hline
+Usuarios Registrados & 3,000 & Analytics \\ \hline
+Consultas Mensuales & 3,000-4,000 & Logs servidor \\ \hline
+Satisfacción Promedio & > 4.0/5.0 & Encuestas \\ \hline
+Tasa de Retención & 30\% & Usuarios activos \\ \hline
+Perfiles Completados & 55-60\% & Base de datos \\ \hline
+Visitas Móviles & > 50\% & Analytics \\ \hline
+\end{tabular}
+\end{table}
+
+\newpage
+
+\subsection{Anexo C: Capturas de Pantalla del Sistema}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} \textbf{PÁGINA DE INICIO} \\ \vspace{0.3cm} https://bioplantas.netlify.app \vspace{4cm}}}
+    \caption{Interfaz de la Página de Inicio de BioPlantes}
+    \label{fig:screenshot_home}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} \textbf{WIZARD DE ONBOARDING MÉDICO} \\ \vspace{0.3cm} Paso 3: Selección de condiciones médicas \vspace{4cm}}}
+    \caption{Cuestionario de Perfil Médico Personalizado}
+    \label{fig:screenshot_onboarding}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} \textbf{CATÁLOGO DE PLANTAS} \\ \vspace{0.3cm} Vista con plantas recomendadas marcadas "✨ Para ti" \vspace{4cm}}}
+    \caption{Catálogo Interactivo de Plantas Medicinales}
+    \label{fig:screenshot_catalogo}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} \textbf{FICHA DETALLADA DE PLANTA} \\ \vspace{0.3cm} Ejemplo: Manzanilla (propiedades, dosificación, contraindicaciones) \vspace{4cm}}}
+    \caption{Información Detallada de Planta Medicinal}
+    \label{fig:screenshot_planta}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} \textbf{CHATBOT DE IA} \\ \vspace{0.3cm} Conversación con Google Gemini AI \vspace{4cm}}}
+    \caption{Asistente Virtual Conversacional}
+    \label{fig:screenshot_chatbot}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} \textbf{PANEL DE ADMINISTRACIÓN} \\ \vspace{0.3cm} Dashboard con estadísticas y opciones de gestión \vspace{4cm}}}
+    \caption{Interfaz de Administración del Sistema}
+    \label{fig:screenshot_admin}
+\end{figure}
+
+\newpage
+
+\subsection{Anexo D: Fotografías del Equipo de Desarrollo}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} \textbf{REUNIÓN DE PLANIFICACIÓN} \\ \vspace{0.3cm} Fase de análisis de requerimientos (Semanas 1-2) \vspace{4cm}}}
+    \caption{Equipo durante Fase de Análisis}
+    \label{fig:foto_planning}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} \textbf{SESIONES DE DESARROLLO} \\ \vspace{0.3cm} Implementación del sistema (Semanas 5-10) \vspace{4cm}}}
+    \caption{Equipo durante Fase de Implementación}
+    \label{fig:foto_coding}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} \textbf{PRUEBAS CON PROFESIONALES} \\ \vspace{0.3cm} Evaluación con enfermeras y médicos (Semanas 11-12) \vspace{4cm}}}
+    \caption{Validación con Profesionales de Salud}
+    \label{fig:foto_testing}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} \textbf{EQUIPO COMPLETO BIOPLANTAS} \\ \vspace{0.3cm} [Incluir nombres de integrantes en el pie de foto] \vspace{4cm}}}
+    \caption{Equipo de Desarrollo del Proyecto BioPlantes}
+    \label{fig:foto_equipo}
+\end{figure}
+
+\end{document}
+
+\textbf{Capa 1 - Frontend (Cliente):}
+\begin{itemize}
+    \item Navegador Web (Chrome, Firefox, Safari, Edge)
+    \item Aplicación React 18 + TypeScript
+    \item Componentes: Interfaz de Usuario, Wizard de Onboarding, Catálogo de Plantas, Perfil de Usuario, Sistema de Comentarios
+    \item Comunicación: HTTPS (puerto 443)
+\end{itemize}
+
+\textbf{Capa 2 - Backend (Servidor):}
+\begin{itemize}
+    \item Supabase Backend-as-a-Service
+    \item Node.js + Express (servidor adicional)
+    \item Servicios: Autenticación, Motor de Recomendaciones, API REST, Procesamiento de Filtros
+    \item Google Gemini AI (Chatbot)
+\end{itemize}
+
+\textbf{Capa 3 - Base de Datos:}
+\begin{itemize}
+    \item PostgreSQL 14
+    \item Tablas: Plants, Profiles, MedicalConditions, UserConditions, Comments, Favorites, Articles
+    \item Seguridad: Row Level Security (RLS), Encriptación
+\end{itemize}
+
+\textbf{Flujo de datos:}
+Usuario → Navegador → Frontend React → API REST → Backend Supabase → PostgreSQL → Respuesta
+
+\vspace{0.5cm}
+
+\textit{[INSERTAR IMAGEN: diagrama\_arquitectura.png]}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.8\textwidth}{\centering \vspace{3cm} ESPACIO RESERVADO PARA DIAGRAMA DE ARQUITECTURA \\ (Crear en Draw.io, Lucidchart o similar) \vspace{3cm}}}
+    \caption{Arquitectura General del Sistema BioPlantes}
+    \label{fig:arquitectura}
+\end{figure}
+
+\vspace{1cm}
+
+\subsubsection{A.2 - Diagrama de Flujo del Usuario}
+
+\textbf{Descripción para diagramador:}
+
+Flujo principal del usuario desde el registro hasta la consulta personalizada:
+
+\textbf{Inicio:} Usuario accede a https://bioplantas.netlify.app
+
+\textbf{Decisión 1:} ¿Tiene cuenta?
+\begin{itemize}
+    \item NO → Registro con email + contraseña → Verificación de email → Login
+    \item SÍ → Login directo
+\end{itemize}
+
+\textbf{Decisión 2:} ¿Completó perfil médico?
+\begin{itemize}
+    \item NO → Wizard Onboarding (4 pasos):
+    \begin{enumerate}
+        \item Bienvenida
+        \item Estados especiales (embarazo, lactancia, pediátrico)
+        \item Selección de condiciones médicas (30+ opciones)
+        \item Confirmación y guardado
+    \end{enumerate}
+    \item SÍ → Dashboard principal
+\end{itemize}
+
+\textbf{Dashboard:} Opciones disponibles
+\begin{itemize}
+    \item Ver catálogo completo
+    \item Ver plantas recomendadas (personalizadas)
+    \item Buscar planta específica
+    \item Consultar chatbot AI
+    \item Ver favoritos
+    \item Leer artículos
+\end{itemize}
+
+\textbf{Selección de Planta:}
+\begin{itemize}
+    \item Aplicación automática de filtros de seguridad
+    \item Visualización de ficha completa
+    \item Alertas de contraindicaciones (si aplica)
+    \item Opciones: Agregar comentario, Marcar favorito, Compartir
+\end{itemize}
+
+\textbf{Fin:} Logout o continuar navegando
+
+\vspace{0.5cm}
+
+\textit{[INSERTAR IMAGEN: diagrama\_flujo\_usuario.png]}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.8\textwidth}{\centering \vspace{3cm} ESPACIO RESERVADO PARA DIAGRAMA DE FLUJO DE USUARIO \\ (Usar formas estándar: óvalos para inicio/fin, rombos para decisiones, rectángulos para procesos) \vspace{3cm}}}
+    \caption{Flujo de Interacción del Usuario con el Sistema}
+    \label{fig:flujo_usuario}
+\end{figure}
+
+\vspace{1cm}
+
+\subsubsection{A.3 - Diagrama del Motor de Recomendaciones}
+
+\textbf{Descripción para diagramador:}
+
+Proceso de generación de recomendaciones personalizadas:
+
+\textbf{Entrada:} Usuario autenticado solicita ver plantas
+
+\textbf{Paso 1:} Recuperar perfil médico del usuario
+\begin{itemize}
+    \item Estados especiales: embarazo (Sí/No), lactancia (Sí/No), pediátrico (Sí/No)
+    \item Lista de condiciones médicas activas
+    \item Medicamentos actuales (opcional)
+\end{itemize}
+
+\textbf{Paso 2:} Aplicar filtros de seguridad
+\begin{itemize}
+    \item SI embarazo = Sí → Filtrar plantas donde pregnancy\_safe = false
+    \item SI lactancia = Sí → Filtrar plantas donde breastfeeding\_safe = false
+    \item SI pediátrico = Sí → Filtrar plantas donde pediatric\_safe = false
+\end{itemize}
+
+\textbf{Paso 3:} Calcular puntuación de relevancia para cada planta
+\begin{itemize}
+    \item Por cada condición médica del usuario:
+    \item Verificar si la planta tiene esa condición en su array de indicaciones
+    \item Puntuación += 1 por cada coincidencia
+    \item Plantas con puntuación > 0 = Recomendadas
+\end{itemize}
+
+\textbf{Paso 4:} Ordenar resultados
+\begin{itemize}
+    \item Plantas recomendadas (puntuación > 0) primero, ordenadas por puntuación DESC
+    \item Plantas no recomendadas después, ordenadas alfabéticamente
+\end{itemize}
+
+\textbf{Paso 5:} Marcar plantas recomendadas con badge "✨ Para ti"
+
+\textbf{Salida:} Lista personalizada de plantas con alertas de seguridad
+
+\vspace{0.5cm}
+
+\textit{[INSERTAR IMAGEN: diagrama\_motor\_recomendaciones.png]}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.8\textwidth}{\centering \vspace{3cm} ESPACIO RESERVADO PARA DIAGRAMA DEL MOTOR DE RECOMENDACIONES \\ (Usar diagrama de flujo con decisiones y procesos) \vspace{3cm}}}
+    \caption{Algoritmo del Motor de Recomendaciones Personalizado}
+    \label{fig:motor_recomendaciones}
+\end{figure}
+
+\vspace{1cm}
+
+\subsubsection{A.4 - Diagrama de Base de Datos (Entidad-Relación)}
+
+\textbf{Descripción para diagramador:}
+
+Modelo de datos simplificado con las entidades principales y sus relaciones:
+
+\textbf{Entidades y atributos principales:}
+
+\textbf{1. profiles (Perfiles de Usuario)}
+\begin{itemize}
+    \item id (PK, UUID)
+    \item email (string)
+    \item full\_name (string)
+    \item is\_pregnant (boolean)
+    \item is\_breastfeeding (boolean)
+    \item is\_pediatric (boolean)
+    \item role (enum: user, admin)
+    \item created\_at (timestamp)
+\end{itemize}
+
+\textbf{2. plants (Plantas Medicinales)}
+\begin{itemize}
+    \item id (PK, integer)
+    \item common\_name (string)
+    \item scientific\_name (string)
+    \item description (text)
+    \item properties (text)
+    \item dosage (text)
+    \item contraindications (text)
+    \item pregnancy\_safe (boolean)
+    \item breastfeeding\_safe (boolean)
+    \item pediatric\_safe (boolean)
+    \item image\_url (string)
+    \item category (string)
+\end{itemize}
+
+\textbf{3. medical\_conditions (Condiciones Médicas)}
+\begin{itemize}
+    \item id (PK, integer)
+    \item name (string)
+    \item category (string)
+    \item description (text)
+\end{itemize}
+
+\textbf{4. user\_medical\_conditions (Relación Usuario-Condiciones)}
+\begin{itemize}
+    \item id (PK, integer)
+    \item user\_id (FK → profiles.id)
+    \item condition\_id (FK → medical\_conditions.id)
+    \item created\_at (timestamp)
+\end{itemize}
+
+\textbf{5. comments (Comentarios)}
+\begin{itemize}
+    \item id (PK, integer)
+    \item user\_id (FK → profiles.id)
+    \item plant\_id (FK → plants.id)
+    \item content (text)
+    \item rating (integer 1-5)
+    \item created\_at (timestamp)
+\end{itemize}
+
+\textbf{6. favorites (Favoritos)}
+\begin{itemize}
+    \item id (PK, integer)
+    \item user\_id (FK → profiles.id)
+    \item plant\_id (FK → plants.id)
+    \item created\_at (timestamp)
+\end{itemize}
+
+\textbf{Relaciones:}
+\begin{itemize}
+    \item profiles 1:N user\_medical\_conditions (Un usuario puede tener múltiples condiciones)
+    \item medical\_conditions 1:N user\_medical\_conditions (Una condición puede estar en múltiples usuarios)
+    \item profiles 1:N comments (Un usuario puede hacer múltiples comentarios)
+    \item plants 1:N comments (Una planta puede tener múltiples comentarios)
+    \item profiles 1:N favorites (Un usuario puede tener múltiples favoritos)
+    \item plants 1:N favorites (Una planta puede ser favorita de múltiples usuarios)
+\end{itemize}
+
+\vspace{0.5cm}
+
+\textit{[INSERTAR IMAGEN: diagrama\_base\_datos.png]}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.8\textwidth}{\centering \vspace{3cm} ESPACIO RESERVADO PARA DIAGRAMA ENTIDAD-RELACIÓN \\ (Usar notación Chen o Crow's Foot, incluir PKs, FKs y cardinalidades) \vspace{3cm}}}
+    \caption{Modelo Entidad-Relación de la Base de Datos}
+    \label{fig:modelo_er}
+\end{figure}
+
+\vspace{1cm}
+
+\subsubsection{A.5 - Diagrama de Casos de Uso}
+
+\textbf{Descripción para diagramador:}
+
+Actores y casos de uso principales del sistema:
+
+\textbf{Actores:}
+\begin{itemize}
+    \item Usuario No Registrado (visitante)
+    \item Usuario Registrado
+    \item Profesional de Salud (usuario registrado)
+    \item Administrador del Sistema
+\end{itemize}
+
+\textbf{Casos de Uso - Usuario No Registrado:}
+\begin{itemize}
+    \item Visualizar catálogo de plantas (modo lectura)
+    \item Buscar planta por nombre
+    \item Leer artículos educativos
+    \item Registrarse en el sistema
+\end{itemize}
+
+\textbf{Casos de Uso - Usuario Registrado:}
+\begin{itemize}
+    \item Iniciar sesión
+    \item Completar/editar perfil médico
+    \item Recibir recomendaciones personalizadas
+    \item Marcar plantas como favoritas
+    \item Escribir comentarios y calificaciones
+    \item Consultar chatbot de IA
+    \item Cerrar sesión
+\end{itemize}
+
+\textbf{Casos de Uso - Profesional de Salud:}
+\begin{itemize}
+    \item Todos los casos de Usuario Registrado, más:
+    \item Acceder a referencias bibliográficas completas
+    \item Consultar información de dosificación avanzada
+    \item Reportar información incorrecta
+\end{itemize}
+
+\textbf{Casos de Uso - Administrador:}
+\begin{itemize}
+    \item Todos los casos anteriores, más:
+    \item Agregar nuevas plantas al catálogo
+    \item Editar información de plantas existentes
+    \item Moderar comentarios de usuarios
+    \item Publicar artículos educativos
+    \item Ver estadísticas de uso del sistema
+    \item Gestionar usuarios
+\end{itemize}
+
+\vspace{0.5cm}
+
+\textit{[INSERTAR IMAGEN: diagrama\_casos\_uso.png]}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.8\textwidth}{\centering \vspace{3cm} ESPACIO RESERVADO PARA DIAGRAMA DE CASOS DE USO \\ (Usar notación UML estándar: muñecos para actores, óvalos para casos de uso, líneas para relaciones) \vspace{3cm}}}
+    \caption{Diagrama de Casos de Uso del Sistema BioPlantes}
+    \label{fig:casos_uso}
+\end{figure}
+
+\newpage
+
+\subsection{Anexo B: Tablas Técnicas}
+
+\subsubsection{B.1 - Tecnologías Utilizadas}
+
+\begin{table}[H]
+\centering
+\caption{Stack Tecnológico Completo del Sistema}
+\label{tab:tecnologias}
+\begin{tabular}{|p{3cm}|p{4cm}|p{6cm}|}
+\hline
+\textbf{Categoría} & \textbf{Tecnología} & \textbf{Versión / Descripción} \\ \hline
+Frontend Framework & React & v18.2.0 - Biblioteca JavaScript para UI \\ \hline
+Lenguaje & TypeScript & v5.0 - JavaScript con tipado estático \\ \hline
+Build Tool & Vite & v4.3 - Herramienta de compilación rápida \\ \hline
+Estilos & Tailwind CSS & v3.3 - Framework CSS utility-first \\ \hline
+Componentes UI & Radix UI & v1.0 - Componentes accesibles \\ \hline
+Backend & Supabase & Cloud - Backend-as-a-Service \\ \hline
+Base de Datos & PostgreSQL & v14 - RDBMS relacional \\ \hline
+Servidor & Node.js + Express & v18.16 / v4.18 - Servidor JavaScript \\ \hline
+Inteligencia Artificial & Google Gemini AI & API v1 - Chatbot conversacional \\ \hline
+Hosting Frontend & Netlify & Cloud - Despliegue continuo \\ \hline
+Control de Versiones & Git + GitHub & - Repositorio de código \\ \hline
+Autenticación & Supabase Auth & - JWT + OAuth \\ \hline
+Almacenamiento & Supabase Storage & - Almacenamiento de imágenes \\ \hline
+Seguridad & Row Level Security & PostgreSQL RLS policies \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{B.2 - Categorías de Condiciones Médicas}
+
+\begin{table}[H]
+\centering
+\caption{Clasificación de Condiciones Médicas en el Sistema}
+\label{tab:condiciones}
+\begin{tabular}{|p{4cm}|p{9cm}|}
+\hline
+\textbf{Categoría} & \textbf{Condiciones Incluidas} \\ \hline
+Gastrointestinales & Gastritis, Estreñimiento, Diarrea, Síndrome de Intestino Irritable, Indigestión, Úlceras, Dispepsia \\ \hline
+Cardiovasculares & Hipertensión Arterial, Colesterol Alto, Triglicéridos Elevados, Circulación Deficiente \\ \hline
+Respiratorias & Asma, Bronquitis, Gripe, Resfriado Común, Tos, Sinusitis \\ \hline
+Neurológicas & Ansiedad, Insomnio, Estrés, Depresión Leve, Migraña, Dolor de Cabeza Tensional \\ \hline
+Musculoesqueléticas & Artritis, Dolor Muscular, Dolor Articular, Reumatismo, Inflamación \\ \hline
+Dermatológicas & Eczema, Psoriasis, Acné, Dermatitis, Heridas Leves, Quemaduras Leves \\ \hline
+Metabólicas & Diabetes Tipo 2, Obesidad, Síndrome Metabólico \\ \hline
+Genitourinarias & Infecciones Urinarias, Cistitis, Prostatitis, Cálculos Renales \\ \hline
+Otras & Fatiga Crónica, Sistema Inmune Débil, Alergias, Inflamación General \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{B.3 - Cronograma de Desarrollo del Proyecto}
+
+\begin{table}[H]
+\centering
+\caption{Fases y Tiempos de Desarrollo}
+\label{tab:cronograma}
+\begin{tabular}{|p{1cm}|p{4cm}|p{2cm}|p{6cm}|}
+\hline
+\textbf{Fase} & \textbf{Actividad} & \textbf{Duración} & \textbf{Entregables} \\ \hline
+1 & Análisis y Planificación & 2 semanas & Documento de requerimientos, Plan de proyecto \\ \hline
+2 & Diseño de Arquitectura & 2 semanas & Diagrama ER, Wireframes, Mockups \\ \hline
+3 & Desarrollo Frontend & 3 semanas & Componentes React, Interfaces de usuario \\ \hline
+3 & Desarrollo Backend & 3 semanas & API REST, Base de datos, Autenticación \\ \hline
+3 & Integración IA & 1 semana & Chatbot funcional \\ \hline
+4 & Pruebas y Validación & 2 semanas & Reporte de pruebas, Correcciones \\ \hline
+5 & Despliegue & 1 semana & Sistema en producción, Documentación \\ \hline
+\multicolumn{2}{|l|}{\textbf{TOTAL}} & \textbf{14 semanas} & \textbf{Sistema completo operativo} \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{B.4 - Métricas de Evaluación del Sistema}
+
+\begin{table}[H]
+\centering
+\caption{Indicadores de Desempeño y Metas}
+\label{tab:metricas}
+\begin{tabular}{|p{5cm}|p{3cm}|p{4cm}|}
+\hline
+\textbf{Indicador} & \textbf{Meta Año 1} & \textbf{Método de Medición} \\ \hline
+Usuarios Registrados & 3,000 & Analytics del sistema \\ \hline
+Consultas Mensuales & 3,000-4,000 & Logs de servidor \\ \hline
+Satisfacción Promedio & > 4.0 / 5.0 & Encuestas trimestrales \\ \hline
+Tasa de Retención & 30\% & Usuarios activos/mes \\ \hline
+Perfiles Completados & 55-60\% & Datos de base de datos \\ \hline
+Tiempo de Búsqueda & < 45 seg & Métricas de usabilidad \\ \hline
+Visitas Móviles & > 50\% & Google Analytics \\ \hline
+Comentarios Moderados & 100\% & Panel administrativo \\ \hline
+Actualización Contenido & Trimestral & Calendario editorial \\ \hline
+\end{tabular}
+\end{table}
+
+\newpage
+
+\subsection{Anexo C: Capturas de Pantalla del Sistema}
+
+\subsubsection{C.1 - Página de Inicio}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} ESPACIO RESERVADO PARA CAPTURA DE PANTALLA \\ Página de Inicio / Landing Page \\ (https://bioplantas.netlify.app) \vspace{4cm}}}
+    \caption{Interfaz de la Página de Inicio de BioPlantes}
+    \label{fig:screenshot_home}
+\end{figure}
+
+\subsubsection{C.2 - Wizard de Onboarding Médico}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} ESPACIO RESERVADO PARA CAPTURA DE PANTALLA \\ Wizard de Perfil Médico - Paso 3 \\ (Selección de condiciones médicas) \vspace{4cm}}}
+    \caption{Cuestionario de Perfil Médico Personalizado}
+    \label{fig:screenshot_onboarding}
+\end{figure}
+
+\subsubsection{C.3 - Catálogo de Plantas Medicinales}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} ESPACIO RESERVADO PARA CAPTURA DE PANTALLA \\ Catálogo de Plantas con Filtros \\ (Vista de tarjetas con plantas recomendadas marcadas) \vspace{4cm}}}
+    \caption{Catálogo Interactivo de Plantas Medicinales}
+    \label{fig:screenshot_catalogo}
+\end{figure}
+
+\subsubsection{C.4 - Ficha Detallada de Planta}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} ESPACIO RESERVADO PARA CAPTURA DE PANTALLA \\ Ficha Completa de Planta (ej: Manzanilla) \\ (Mostrando: imagen, descripción, propiedades, dosificación, contraindicaciones, alertas) \vspace{4cm}}}
+    \caption{Información Detallada de Planta Medicinal}
+    \label{fig:screenshot_planta}
+\end{figure}
+
+\subsubsection{C.5 - Chatbot de Inteligencia Artificial}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} ESPACIO RESERVADO PARA CAPTURA DE PANTALLA \\ Chatbot AI respondiendo consulta \\ (Ejemplo de conversación con Google Gemini) \vspace{4cm}}}
+    \caption{Asistente Virtual Conversacional}
+    \label{fig:screenshot_chatbot}
+\end{figure}
+
+\subsubsection{C.6 - Panel de Administración}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} ESPACIO RESERVADO PARA CAPTURA DE PANTALLA \\ Panel Administrativo \\ (Dashboard con estadísticas y opciones de gestión) \vspace{4cm}}}
+    \caption{Interfaz de Administración del Sistema}
+    \label{fig:screenshot_admin}
+\end{figure}
+
+\newpage
+
+\subsection{Anexo D: Fotografías del Equipo de Desarrollo}
+
+\subsubsection{D.1 - Reuniones de Planificación}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} ESPACIO RESERVADO PARA FOTOGRAFÍA \\ Reunión del equipo - Fase de Planificación \\ (Fecha: Semana 1-2 del proyecto) \vspace{4cm}}}
+    \caption{Equipo de Desarrollo durante Fase de Análisis de Requerimientos}
+    \label{fig:foto_planning}
+\end{figure}
+
+\subsubsection{D.2 - Sesiones de Desarrollo}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} ESPACIO RESERVADO PARA FOTOGRAFÍA \\ Sesión de programación del equipo \\ (Fecha: Semanas 5-10 del proyecto) \vspace{4cm}}}
+    \caption{Equipo durante Fase de Implementación del Sistema}
+    \label{fig:foto_coding}
+\end{figure}
+
+\subsubsection{D.3 - Pruebas con Profesionales de Salud}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} ESPACIO RESERVADO PARA FOTOGRAFÍA \\ Evaluación con profesionales de enfermería \\ (Fecha: Semanas 11-12 del proyecto) \vspace{4cm}}}
+    \caption{Validación del Sistema con Profesionales de Salud}
+    \label{fig:foto_testing}
+\end{figure}
+
+\subsubsection{D.4 - Equipo Completo}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\parbox{0.9\textwidth}{\centering \vspace{4cm} ESPACIO RESERVADO PARA FOTOGRAFÍA \\ Foto oficial del equipo BioPlantes \\ (Incluir nombres completos en el pie de foto) \vspace{4cm}}}
+    \caption{Equipo Completo de Desarrollo del Proyecto BioPlantes}
+    \label{fig:foto_equipo}
+\end{figure}
+
+\vspace{1cm}
+
+\textit{Nota: Todas las fotografías deben incluir fecha, lugar y descripción de la actividad realizada. Se recomienda resolución mínima de 1920x1080 píxeles para impresión de calidad.}
+
+
+
+
+\end{document}

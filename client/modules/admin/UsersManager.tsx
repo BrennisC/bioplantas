@@ -8,7 +8,8 @@ interface UserData {
   id: string;
   email: string;
   role: 'user' | 'admin';
-  full_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
   created_at: string;
 }
 
@@ -184,7 +185,11 @@ export default function UsersManager() {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium">{user.full_name || 'Sin nombre'}</p>
+                          <p className="font-medium">
+                            {user.first_name || user.last_name 
+                              ? `${user.first_name || ''} ${user.last_name || ''}`.trim() 
+                              : 'Sin nombre'}
+                          </p>
                           <p className="text-xs text-muted-foreground">{user.id.slice(0, 8)}...</p>
                         </div>
                       </div>

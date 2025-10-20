@@ -83,14 +83,17 @@ export default function PlantComments({ plantId, plantName }: PlantCommentsProps
         const userIds = [...new Set(data.map(c => c.user_id))];
         const { data: users } = await supabase
           .from('profiles')
-          .select('id, name, email')
+          .select('id, first_name, last_name, email')
           .in('id', userIds);
 
         const enrichedComments = data.map(comment => {
           const user = users?.find(u => u.id === comment.user_id);
+          const fullName = user?.first_name || user?.last_name
+            ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
+            : null;
           return {
             ...comment,
-            user_name: user?.name || user?.email?.split('@')[0] || 'Usuario',
+            user_name: fullName || user?.email?.split('@')[0] || 'Usuario',
             user_email: user?.email
           };
         });
