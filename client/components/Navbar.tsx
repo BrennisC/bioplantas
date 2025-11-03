@@ -169,7 +169,13 @@ export default function Navbar() {
           ) : (
             <>
               <NavLink to="/explorar" className={navItemClass}>
-                Explorar
+                Explorar Plantas
+              </NavLink>
+              <NavLink to="/medications" className={navItemClass}>
+                Medicamentos
+              </NavLink>
+              <NavLink to="/compatibilidad" className={navItemClass}>
+                Compatibilidad
               </NavLink>
               <NavLink to="/favoritos" className={navItemClass}>
                 <div className="flex items-center gap-1.5">
@@ -246,6 +252,26 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Explorar Plantas
+                  </NavLink>
+                  
+                  <NavLink 
+                    to="/medications" 
+                    className={({ isActive }) => `flex items-center px-4 py-3 rounded-lg transition-colors ${
+                      isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Medicamentos
+                  </NavLink>
+                  
+                  <NavLink 
+                    to="/compatibilidad" 
+                    className={({ isActive }) => `flex items-center px-4 py-3 rounded-lg transition-colors ${
+                      isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Compatibilidad
                   </NavLink>
                   
                   <NavLink 

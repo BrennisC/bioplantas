@@ -20,6 +20,9 @@ import Explore from "./modules/user/Explore";
 import Login from "./modules/auth/Login";
 import Register from "./modules/auth/Register";
 import Dashboard from "./modules/admin/Dashboard";
+import MedicationsPage from "./pages/MedicationsPage";
+import MedicationDetailPage from "./pages/MedicationDetailPage";
+import CompatibilityPage from "./pages/CompatibilityPage";
 // import AIChatBot from "./modules/ai/AIChatBot"; // ❌ DESHABILITADO - CAUSA PANTALLA EN BLANCO
 import { AuthProvider } from "./modules/auth/useAuth";
 import { RequireAuth, RequireAdmin } from "./components/ProtectedRoute";
@@ -71,6 +74,36 @@ function AnimatedRoutes() {
             <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <RequireAuth>
                 <Favorites />
+              </RequireAuth>
+            </motion.main>
+          }
+        />
+        <Route
+          path="/medications"
+          element={
+            <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <RequireAuth>
+                <MedicationsPage />
+              </RequireAuth>
+            </motion.main>
+          }
+        />
+        <Route
+          path="/medications/:id"
+          element={
+            <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <RequireAuth>
+                <MedicationDetailPage />
+              </RequireAuth>
+            </motion.main>
+          }
+        />
+        <Route
+          path="/compatibilidad"
+          element={
+            <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <RequireAuth>
+                <CompatibilityPage />
               </RequireAuth>
             </motion.main>
           }

@@ -21,12 +21,13 @@ interface OnboardingWizardProps {
 }
 
 export default function OnboardingWizard({ open, userId, onComplete }: OnboardingWizardProps) {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0); // ⬅️ CAMBIADO: Ahora empieza en 0
   const [loading, setLoading] = useState(false);
   const [conditions, setConditions] = useState<MedicalCondition[]>([]);
   const { toast } = useToast();
 
   // Estado del formulario
+  const [treatmentPreference, setTreatmentPreference] = useState<'natural' | 'conventional' | 'integrative'>('integrative'); // ⬅️ NUEVO
   const [gender, setGender] = useState<string>(""); // ⬅️ NUEVO: Género del usuario
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   const [isPregnant, setIsPregnant] = useState(false);
@@ -81,6 +82,15 @@ export default function OnboardingWizard({ open, userId, onComplete }: Onboardin
   const handleComplete = async () => {
     setLoading(true);
     try {
+      // Actualizar treatment_preference en profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ treatment_preference: treatmentPreference })
+        .eq('id', userId);
+
+      if (profileError) throw profileError;
+
+      // Guardar perfil médico
       const { error } = await supabase
         .from('user_medical_profile')
         .upsert({
@@ -132,10 +142,10 @@ export default function OnboardingWizard({ open, userId, onComplete }: Onboardin
       });
       return;
     }
-    setStep(prev => Math.min(prev + 1, 5)); // ⬅️ Ahora son 5 pasos
+    setStep(prev => Math.min(prev + 1, 4)); // ⬅️ Ahora son 5 pasos (0-4)
   };
   
-  const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
+  const prevStep = () => setStep(prev => Math.max(prev - 1, 0)); // ⬅️ Ahora puede volver a 0
 
   const groupedConditions = conditions.reduce((acc, condition) => {
     if (!acc[condition.category]) {
@@ -160,7 +170,7 @@ export default function OnboardingWizard({ open, userId, onComplete }: Onboardin
             <div>
               <h2 className="text-2xl font-bold">Completa tu perfil médico (opcional)</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Paso {step} de 5 - Te ayudaremos a encontrar las plantas adecuadas para ti
+                Paso {step + 1} de 5 - Te ayudaremos a encontrar el tratamiento adecuado para ti
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -171,7 +181,9 @@ export default function OnboardingWizard({ open, userId, onComplete }: Onboardin
               >
                 Saltar por ahora
               </button>
-              <div className="text-3xl">{step === 1 ? "🏥" : step === 2 ? "👤" : step === 3 ? "💊" : "✅"}</div>
+              <div className="text-3xl">
+                {step === 0 ? "🏥" : step === 1 ? "👤" : step === 2 ? "💊" : step === 3 ? "🌿" : "✅"}
+              </div>
             </div>
           </div>
           
@@ -179,8 +191,8 @@ export default function OnboardingWizard({ open, userId, onComplete }: Onboardin
           <div className="mt-4 h-2 bg-muted rounded-full overflow-hidden">
             <motion.div
               className="h-full bg-primary"
-              initial={{ width: "25%" }}
-              animate={{ width: `${(step / 4) * 100}%` }}
+              initial={{ width: "0%" }}
+              animate={{ width: `${((step + 1) / 5) * 100}%` }}
               transition={{ duration: 0.3 }}
             />
           </div>
@@ -189,6 +201,111 @@ export default function OnboardingWizard({ open, userId, onComplete }: Onboardin
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           <AnimatePresence mode="wait">
+            {/* Step 0: Preferencia de Tratamiento */}
+            {step === 0 && (
+              <motion.div
+                key="step0"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">¿Qué tipo de tratamiento prefieres?</h3>
+                  <p className="text-muted-foreground">
+                    BioPlantes combina lo mejor de la medicina natural y convencional. Elige tu enfoque preferido.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  {/* Opción: Medicina Natural */}
+                  <button
+                    onClick={() => setTreatmentPreference('natural')}
+                    className={`flex items-start gap-4 p-6 rounded-xl border-2 transition-all text-left ${
+                      treatmentPreference === 'natural'
+                        ? "border-green-500 bg-green-50 dark:bg-green-950/20 shadow-lg"
+                        : "border-border hover:border-green-300"
+                    }`}
+                  >
+                    <span className="text-5xl">🌿</span>
+                    <div className="flex-1">
+                      <div className="font-bold text-lg mb-1">Medicina Natural</div>
+                      <div className="text-sm text-muted-foreground">
+                        Solo plantas medicinales y remedios naturales. Ideal para quienes prefieren tratamientos herbales tradicionales.
+                      </div>
+                      <div className="mt-3 flex gap-2">
+                        <Badge variant="secondary" className="text-xs">Plantas medicinales</Badge>
+                        <Badge variant="secondary" className="text-xs">Remedios herbales</Badge>
+                      </div>
+                    </div>
+                    {treatmentPreference === 'natural' && <Check className="w-6 h-6 text-green-600 flex-shrink-0" />}
+                  </button>
+
+                  {/* Opción: Medicina Convencional */}
+                  <button
+                    onClick={() => setTreatmentPreference('conventional')}
+                    className={`flex items-start gap-4 p-6 rounded-xl border-2 transition-all text-left ${
+                      treatmentPreference === 'conventional'
+                        ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20 shadow-lg"
+                        : "border-border hover:border-blue-300"
+                    }`}
+                  >
+                    <span className="text-5xl">💊</span>
+                    <div className="flex-1">
+                      <div className="font-bold text-lg mb-1">Medicina Convencional</div>
+                      <div className="text-sm text-muted-foreground">
+                        Medicamentos farmacéuticos con evidencia clínica. Para quienes confían en tratamientos científicamente probados.
+                      </div>
+                      <div className="mt-3 flex gap-2">
+                        <Badge variant="secondary" className="text-xs">Medicamentos</Badge>
+                        <Badge variant="secondary" className="text-xs">Evidencia científica</Badge>
+                      </div>
+                    </div>
+                    {treatmentPreference === 'conventional' && <Check className="w-6 h-6 text-blue-600 flex-shrink-0" />}
+                  </button>
+
+                  {/* Opción: Medicina Integrativa (RECOMENDADO) */}
+                  <button
+                    onClick={() => setTreatmentPreference('integrative')}
+                    className={`flex items-start gap-4 p-6 rounded-xl border-2 transition-all text-left relative ${
+                      treatmentPreference === 'integrative'
+                        ? "border-purple-500 bg-purple-50 dark:bg-purple-950/20 shadow-lg"
+                        : "border-border hover:border-purple-300"
+                    }`}
+                  >
+                    <Badge className="absolute top-3 right-3 bg-purple-600">Recomendado</Badge>
+                    <span className="text-5xl">🌿💊</span>
+                    <div className="flex-1">
+                      <div className="font-bold text-lg mb-1">Medicina Integrativa</div>
+                      <div className="text-sm text-muted-foreground">
+                        Lo mejor de ambos mundos. Combina plantas medicinales y medicamentos con <strong>verificación automática de interacciones</strong>.
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Badge variant="secondary" className="text-xs">Plantas + Medicamentos</Badge>
+                        <Badge variant="secondary" className="text-xs">Detección de interacciones</Badge>
+                        <Badge variant="secondary" className="text-xs">Seguro y efectivo</Badge>
+                      </div>
+                      <div className="mt-3 p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg border border-purple-200 dark:border-purple-800">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                          <p className="text-xs text-purple-900 dark:text-purple-100">
+                            <strong>Sistema de Seguridad:</strong> Te alertaremos automáticamente si una planta puede interactuar con tus medicamentos.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    {treatmentPreference === 'integrative' && <Check className="w-6 h-6 text-purple-600 flex-shrink-0" />}
+                  </button>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-4 mt-6">
+                  <p className="text-sm text-muted-foreground">
+                    💡 <strong>Puedes cambiar esto en cualquier momento</strong> desde la configuración de tu perfil.
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
             {/* Step 1: Género */}
             {step === 1 && (
               <motion.div
@@ -523,6 +640,16 @@ export default function OnboardingWizard({ open, userId, onComplete }: Onboardin
                 </div>
 
                 <div className="space-y-4">
+                  {/* Mostrar preferencia de tratamiento */}
+                  <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-2 border-purple-200 dark:border-purple-800">
+                    <h4 className="font-medium mb-2">Preferencia de Tratamiento:</h4>
+                    <Badge variant="secondary" className="text-base py-1">
+                      {treatmentPreference === 'natural' && '🌿 Medicina Natural'}
+                      {treatmentPreference === 'conventional' && '💊 Medicina Convencional'}
+                      {treatmentPreference === 'integrative' && '🌿💊 Medicina Integrativa'}
+                    </Badge>
+                  </div>
+
                   {/* Mostrar género */}
                   <div className="p-4 rounded-lg bg-muted/50">
                     <h4 className="font-medium mb-2">Género:</h4>
@@ -576,13 +703,13 @@ export default function OnboardingWizard({ open, userId, onComplete }: Onboardin
             <Button
               variant="ghost"
               onClick={prevStep}
-              disabled={step === 1}
+              disabled={step === 0}
             >
               <ChevronLeft className="w-4 h-4 mr-2" />
               Anterior
             </Button>
 
-            {step < 5 ? (
+            {step < 4 ? (
               <Button onClick={nextStep}>
                 Siguiente
                 <ChevronRight className="w-4 h-4 ml-2" />
