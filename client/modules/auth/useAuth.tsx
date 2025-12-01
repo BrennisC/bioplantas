@@ -94,22 +94,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
-
-      setSession({
-        email: user.email!,
-        role: (data?.role as Role) || 'user',
-        id: userId,
-        user
-      });
+      if (error) {
+        console.error('❌ Error al obtener perfil:', error);
+        // Si el perfil no existe, intentar crearlo con rol 'user' por defecto
+        if (error.code === 'PGRST116') {
+          console.log('⚠️ Perfil no existe, creando uno nuevo con rol user...');
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({ id: userId, email: user.email, role: 'user' });
+          
+          if (insertError) {
+            console.error('❌ Error creando perfil:', insertError);
+          }
+          
+          setSession({
+            email: user.email!,
+            role: 'user',
+            id: userId,
+            user
+          });
+        } else {
+          // Para otros errores, mantener el usuario sin sesión
+          throw error;
+        }
+      } else {
+        // Perfil encontrado correctamente
+        const userRole = (data?.role as Role) || 'user';
+        console.log('✅ Perfil cargado correctamente:', { userId, role: userRole });
+        
+        setSession({
+          email: user.email!,
+          role: userRole,
+          id: userId,
+          user
+        });
+      }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
-      setSession({
-        email: user.email!,
-        role: 'user',
-        id: userId,
-        user
-      });
+      console.error('💥 Error crítico en fetchUserProfile:', error);
+      // En caso de error crítico, no establecer sesión
+      setSession(null);
     } finally {
       setLoading(false);
     }
@@ -135,10 +158,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .eq('id', data.user.id)
             .single();
 
-          console.log('👤 Datos del usuario:', { userId: data.user.id, userData, userError });
+          console.log('👤 Login - Datos del usuario:', { userId: data.user.id, userData, userError });
 
           if (!userError && userData) {
+            console.log('✅ Login exitoso - Rol:', userData.role);
             return { success: true, role: userData.role as Role };
+          } else {
+            console.warn('⚠️ No se pudo obtener el rol del perfil, usando user por defecto');
           }
         }
 

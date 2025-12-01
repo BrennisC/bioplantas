@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Leaf, Users, BarChart3, MessageSquare, Shield, Activity, TrendingUp, Eye, Heart, Tag, Bell, Image, Settings, Lightbulb, Sparkles, Menu, X } from "lucide-react";
+import { Leaf, Users, BarChart3, MessageSquare, Shield, Activity, TrendingUp, Eye, Heart, Tag, Bell, Image, Settings, Lightbulb, Sparkles, Menu, X, Pill, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
 import PlantsManager from "./PlantsManager";
 import UsersManager from "./UsersManager";
@@ -12,6 +12,8 @@ import MediaManager from "./MediaManager";
 import SettingsManager from "./SettingsManager";
 import SuggestionsManager from "./SuggestionsManager";
 import AIAnalytics from "./AIAnalytics";
+import MedicationsManager from "./MedicationsManager";
+import InteractionsManager from "./InteractionsManager";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "../auth/useAuth";
 
@@ -21,7 +23,9 @@ const items = [
   { key: "ai", label: "IA Analytics", icon: Sparkles },
   { key: "favorites", label: "Favoritos & Tendencias", icon: Heart },
   { key: "plants", label: "Gestión de Plantas", icon: Leaf },
-  { key: "users", label: "Usuarios", icon: Users },
+    { key: "medications", label: "Medicamentos", icon: Pill },
+    { key: "interactions", label: "Interacciones", icon: AlertTriangle },
+    { key: "users", label: "Usuarios", icon: Users },
   { key: "comments", label: "Comentarios", icon: MessageSquare },
   { key: "categories", label: "Categorías & Tags", icon: Tag },
   { key: "suggestions", label: "Sugerencias", icon: Lightbulb },
@@ -289,6 +293,18 @@ export default function Dashboard() {
             {tab === "plants" && (
               <div>
                 <PlantsManager />
+              </div>
+            )}
+            
+            {tab === "medications" && (
+              <div>
+                <MedicationsManager />
+              </div>
+            )}
+            
+            {tab === "interactions" && (
+              <div>
+                <InteractionsManager />
               </div>
             )}
             

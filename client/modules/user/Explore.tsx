@@ -19,6 +19,7 @@ export default function Explore() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]); // ⬅️ NUEVO: Filtro por región
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedAilments, setSelectedAilments] = useState<string[]>([]);
   const [view, setView] = useState<ViewType>("grid");
@@ -52,6 +53,14 @@ export default function Explore() {
 
   const checkMedicalProfile = async () => {
     try {
+      // ✅ NUEVO: Si es admin, no mostrar onboarding
+      if (session?.role === 'admin') {
+        console.log('👑 Usuario es admin, saltando onboarding');
+        setShowOnboarding(false);
+        setUserProfile(null);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('user_medical_profile')
         .select('*')
@@ -63,9 +72,11 @@ export default function Explore() {
       }
 
       if (!data || !data.onboarding_completed) {
+        console.log('📋 Mostrando onboarding - perfil incompleto');
         setShowOnboarding(true);
         setUserProfile(null);
       } else {
+        console.log('✅ Perfil médico completo');
         // Obtener nombres de las condiciones médicas del usuario
         if (data.conditions && data.conditions.length > 0) {
           const { data: conditionsData } = await supabase
@@ -173,6 +184,19 @@ export default function Explore() {
       );
     }
 
+    // Filtro de regiones
+    if (selectedRegions.length > 0) {
+      result = result.filter(p => {
+        const plantRegion = (p as any).region;
+        // Si no tiene región (NULL) y se seleccionó "Introducidas"
+        if (selectedRegions.includes('Introducidas') && !plantRegion) {
+          return true;
+        }
+        // Si tiene región y está en la selección
+        return plantRegion && selectedRegions.includes(plantRegion);
+      });
+    }
+
     // Filtro de tags
     if (selectedTags.length > 0) {
       result = result.filter(p =>
@@ -212,11 +236,12 @@ export default function Explore() {
     }
 
     return result;
-  }, [plants, searchQuery, selectedCategories, selectedTags, selectedAilments, sortBy, onlySafeForMe, userProfile]);
+  }, [plants, searchQuery, selectedCategories, selectedRegions, selectedTags, selectedAilments, sortBy, onlySafeForMe, userProfile]);
 
   const handleClearAllFilters = () => {
     setSearchQuery("");
     setSelectedCategories([]);
+    setSelectedRegions([]);
     setSelectedTags([]);
     setSelectedAilments([]);
     // Limpiar URL params
@@ -238,6 +263,7 @@ export default function Explore() {
   const hasActiveFilters = 
     searchQuery || 
     selectedCategories.length > 0 || 
+    selectedRegions.length > 0 ||
     selectedTags.length > 0 || 
     selectedAilments.length > 0;
 
@@ -389,6 +415,20 @@ export default function Explore() {
               </button>
             </Badge>
           ))}
+          {selectedRegions.map(region => (
+            <Badge key={region} variant="secondary" className="gap-1">
+              {region === 'Costa' && '🌊 Costa'}
+              {region === 'Sierra' && '⛰️ Sierra'}
+              {region === 'Selva' && '🌴 Selva'}
+              {region === 'Introducidas' && '🌍 Introducidas'}
+              <button
+                onClick={() => setSelectedRegions(prev => prev.filter(r => r !== region))}
+                className="ml-1 hover:bg-background/20 rounded-full p-0.5"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </Badge>
+          ))}
         </div>
 
         {/* View Toggle + Sort */}
@@ -403,9 +443,11 @@ export default function Explore() {
         {/* Sidebar de Filtros */}
         <PlantFilters
           selectedCategories={selectedCategories}
+          selectedRegions={selectedRegions}
           selectedTags={selectedTags}
           selectedAilments={selectedAilments}
           onCategoryChange={setSelectedCategories}
+          onRegionChange={setSelectedRegions}
           onTagChange={setSelectedTags}
           onAilmentChange={setSelectedAilments}
           onClearAll={handleClearAllFilters}

@@ -142,7 +142,7 @@ export default function OnboardingWizard({ open, userId, onComplete }: Onboardin
       });
       return;
     }
-    setStep(prev => Math.min(prev + 1, 4)); // ⬅️ Ahora son 5 pasos (0-4)
+    setStep(prev => Math.min(prev + 1, 5)); // ⬅️ Ahora son 6 pasos (0-5)
   };
   
   const prevStep = () => setStep(prev => Math.max(prev - 1, 0)); // ⬅️ Ahora puede volver a 0
@@ -170,7 +170,7 @@ export default function OnboardingWizard({ open, userId, onComplete }: Onboardin
             <div>
               <h2 className="text-2xl font-bold">Completa tu perfil médico (opcional)</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Paso {step + 1} de 5 - Te ayudaremos a encontrar el tratamiento adecuado para ti
+                Paso {step + 1} de 6 - Te ayudaremos a encontrar el tratamiento adecuado para ti
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -192,7 +192,7 @@ export default function OnboardingWizard({ open, userId, onComplete }: Onboardin
             <motion.div
               className="h-full bg-primary"
               initial={{ width: "0%" }}
-              animate={{ width: `${((step + 1) / 5) * 100}%` }}
+              animate={{ width: `${((step + 1) / 6) * 100}%` }}
               transition={{ duration: 0.3 }}
             />
           </div>
@@ -709,7 +709,7 @@ export default function OnboardingWizard({ open, userId, onComplete }: Onboardin
               Anterior
             </Button>
 
-            {step < 4 ? (
+            {step < 5 ? (
               <Button onClick={nextStep}>
                 Siguiente
                 <ChevronRight className="w-4 h-4 ml-2" />

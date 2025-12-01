@@ -97,7 +97,8 @@ export default function PlantsManager() {
           ailments: p.ailments,
           scientific_article_url: p.scientific_article_url,
           usage_instructions: p.usage_instructions,
-          warnings: p.warnings
+          warnings: p.warnings,
+          region: (p as any).region || null
         };
         
         console.log('📦 Datos que se enviarán al UPDATE:', updateData);
@@ -138,6 +139,7 @@ export default function PlantsManager() {
             ailments: p.ailments,
             scientific_article_url: p.scientific_article_url,
             usage_instructions: p.usage_instructions,
+            region: (p as any).region || null,
             warnings: p.warnings
           }])
           .select()
@@ -320,9 +322,18 @@ export default function PlantsManager() {
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-500 border border-green-500/20">
-                        {plant.category || "Sin categoría"}
-                      </span>
+                      <div className="flex flex-col gap-1.5">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-500 border border-green-500/20">
+                          {plant.category || "Sin categoría"}
+                        </span>
+                        {(plant as any).region && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                            {(plant as any).region === 'Costa' && '🌊 Costa'}
+                            {(plant as any).region === 'Sierra' && '⛰️ Sierra'}
+                            {(plant as any).region === 'Selva' && '🌴 Selva'}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-4">
                       <p className="text-sm text-muted-foreground line-clamp-2">
@@ -665,8 +676,9 @@ function PlantEditor({ initial, onSave }: { initial?: Partial<Plant>; onSave: (p
           tags: v.tags || [],
           ailments: v.ailments || [],
           usage_instructions: v.usage_instructions?.trim() || null,
-          warnings: v.warnings?.trim() || null
-        });
+          warnings: v.warnings?.trim() || null,
+          region: (v as any).region || null
+        } as any);
       }}
     >
       <div className="grid sm:grid-cols-2 gap-3">
@@ -674,18 +686,36 @@ function PlantEditor({ initial, onSave }: { initial?: Partial<Plant>; onSave: (p
         <input className="input" placeholder="Nombre científico *" required value={v.scientific_name || ""} onChange={(e) => setV({ ...v, scientific_name: e.target.value })} />
       </div>
       
-      <div>
-        <label className="text-sm font-medium text-foreground mb-2 block">Categoría *</label>
-        <select 
-          className="input w-full"
-          value={v.category || "Hierbas"}
-          onChange={(e) => setV({ ...v, category: e.target.value })}
-          required
-        >
-          {categories.map(cat => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
+      <div className="grid sm:grid-cols-2 gap-3">
+        <div>
+          <label className="text-sm font-medium text-foreground mb-2 block">Categoría *</label>
+          <select 
+            className="input w-full"
+            value={v.category || "Hierbas"}
+            onChange={(e) => setV({ ...v, category: e.target.value })}
+            required
+          >
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-foreground mb-2 block">
+            Región <span className="text-xs text-muted-foreground">(Opcional)</span>
+          </label>
+          <select 
+            className="input w-full"
+            value={(v as any).region || ""}
+            onChange={(e) => setV({ ...v, region: e.target.value || null } as any)}
+          >
+            <option value="">Sin región específica</option>
+            <option value="Costa">🌊 Costa</option>
+            <option value="Sierra">⛰️ Sierra</option>
+            <option value="Selva">🌴 Selva</option>
+          </select>
+        </div>
       </div>
 
       {/* Campo de imagen mejorado con preview y upload */}

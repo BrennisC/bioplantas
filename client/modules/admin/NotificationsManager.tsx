@@ -80,31 +80,7 @@ export default function NotificationsManager() {
     try {
       setSending(true);
 
-      // Obtener usuarios según el target
-      let query = supabase.from('profiles').select('id, email, role');
-      
-      if (formData.target === "users") {
-        query = query.eq('role', 'user');
-      } else if (formData.target === "admins") {
-        query = query.eq('role', 'admin');
-      }
-
-      const { data: users, error: usersError } = await query;
-
-      if (usersError) throw usersError;
-
-      const userCount = users?.length || 0;
-
-      if (userCount === 0) {
-        toast({
-          title: "Sin destinatarios",
-          description: "No hay usuarios para enviar la notificación",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Obtener el ID del admin actual
+      // Obtener el ID del admin actual PRIMERO
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       
       if (!currentUser) {
@@ -113,6 +89,39 @@ export default function NotificationsManager() {
           description: "No se pudo obtener tu información de usuario",
           variant: "destructive"
         });
+        return;
+      }
+
+      console.log('📧 Enviando notificación...', { target: formData.target, currentUser: currentUser.id });
+
+      // Obtener usuarios según el target
+      let query = supabase.from('profiles').select('id, email, role');
+      
+      if (formData.target === "users") {
+        query = query.eq('role', 'user');
+      } else if (formData.target === "admins") {
+        query = query.eq('role', 'admin');
+      }
+      // Si es 'all', no agregamos filtro
+
+      const { data: users, error: usersError } = await query;
+
+      if (usersError) {
+        console.error('❌ Error obteniendo usuarios:', usersError);
+        throw usersError;
+      }
+
+      const userCount = users?.length || 0;
+
+      console.log('👥 Usuarios encontrados:', userCount, users);
+
+      if (userCount === 0) {
+        toast({
+          title: "Sin destinatarios",
+          description: "No hay usuarios para enviar la notificación",
+          variant: "destructive"
+        });
+        setSending(false);
         return;
       }
 
@@ -126,11 +135,16 @@ export default function NotificationsManager() {
         created_by: currentUser.id
       }));
 
+      console.log('📝 Insertando notificaciones:', notificationsToInsert.length);
+
       const { error: insertError } = await supabase
         .from('notifications')
         .insert(notificationsToInsert);
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('❌ Error insertando notificaciones:', insertError);
+        throw insertError;
+      }
 
       // Simular guardado en historial local
       const newNotification: Notification = {
@@ -142,6 +156,8 @@ export default function NotificationsManager() {
       };
 
       setNotifications(prev => [newNotification, ...prev]);
+
+      console.log('✅ Notificaciones enviadas exitosamente');
 
       toast({
         title: "✅ Notificación enviada",
@@ -159,10 +175,10 @@ export default function NotificationsManager() {
       setModalOpen(false);
 
     } catch (error: any) {
-      console.error('Error sending notification:', error);
+      console.error('💥 Error sending notification:', error);
       toast({
         title: "Error al enviar",
-        description: error.message,
+        description: error.message || "Ocurrió un error al enviar la notificación",
         variant: "destructive"
       });
     } finally {

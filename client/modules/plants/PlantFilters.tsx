@@ -7,13 +7,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { X, Filter } from "lucide-react";
 
 interface PlantFiltersProps {
   selectedCategories: string[];
+  selectedRegions: string[]; // ⬅️ NUEVO
   selectedTags: string[];
   selectedAilments: string[];
   onCategoryChange: (categories: string[]) => void;
+  onRegionChange: (regions: string[]) => void; // ⬅️ NUEVO
   onTagChange: (tags: string[]) => void;
   onAilmentChange: (ailments: string[]) => void;
   onClearAll: () => void;
@@ -21,9 +24,11 @@ interface PlantFiltersProps {
 
 export default function PlantFilters({
   selectedCategories,
+  selectedRegions, // ⬅️ NUEVO
   selectedTags,
   selectedAilments,
   onCategoryChange,
+  onRegionChange, // ⬅️ NUEVO
   onTagChange,
   onAilmentChange,
   onClearAll
@@ -32,6 +37,12 @@ export default function PlantFilters({
   const [tags, setTags] = useState<Array<{ name: string; color: string }>>([]);
   const [ailments, setAilments] = useState<Array<{ name: string; color: string }>>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Contadores de plantas por filtro
+  const [regionCounts, setRegionCounts] = useState<Record<string, number>>({});
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+  const [tagCounts, setTagCounts] = useState<Record<string, number>>({});
+  const [ailmentCounts, setAilmentCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     loadFilterOptions();
@@ -42,7 +53,7 @@ export default function PlantFilters({
       // Obtener todas las plantas primero
       const { data: allPlants, error: plantsError } = await supabase
         .from('plants')
-        .select('category, tags, ailments');
+        .select('category, tags, ailments, region');
 
       if (plantsError) throw plantsError;
 
@@ -50,12 +61,49 @@ export default function PlantFilters({
       const categoriesInUse = new Set<string>();
       const tagsInUse = new Set<string>();
       const ailmentsInUse = new Set<string>();
+      
+      // Contadores
+      const regionCountMap: Record<string, number> = { Costa: 0, Sierra: 0, Selva: 0, Introducidas: 0 };
+      const categoryCountMap: Record<string, number> = {};
+      const tagCountMap: Record<string, number> = {};
+      const ailmentCountMap: Record<string, number> = {};
 
       allPlants?.forEach(plant => {
-        if (plant.category) categoriesInUse.add(plant.category);
-        if (plant.tags) plant.tags.forEach((tag: string) => tagsInUse.add(tag));
-        if (plant.ailments) plant.ailments.forEach((ailment: string) => ailmentsInUse.add(ailment));
+        // Categorías
+        if (plant.category) {
+          categoriesInUse.add(plant.category);
+          categoryCountMap[plant.category] = (categoryCountMap[plant.category] || 0) + 1;
+        }
+        
+        // Tags
+        if (plant.tags) {
+          plant.tags.forEach((tag: string) => {
+            tagsInUse.add(tag);
+            tagCountMap[tag] = (tagCountMap[tag] || 0) + 1;
+          });
+        }
+        
+        // Ailments
+        if (plant.ailments) {
+          plant.ailments.forEach((ailment: string) => {
+            ailmentsInUse.add(ailment);
+            ailmentCountMap[ailment] = (ailmentCountMap[ailment] || 0) + 1;
+          });
+        }
+        
+        // Regiones
+        const region = (plant as any).region;
+        if (region === 'Costa') regionCountMap.Costa++;
+        else if (region === 'Sierra') regionCountMap.Sierra++;
+        else if (region === 'Selva') regionCountMap.Selva++;
+        else regionCountMap.Introducidas++; // NULL = Introducidas
       });
+
+      // Guardar contadores
+      setRegionCounts(regionCountMap);
+      setCategoryCounts(categoryCountMap);
+      setTagCounts(tagCountMap);
+      setAilmentCounts(ailmentCountMap);
 
       // Obtener datos de las tablas de filtros
       const [categoriesRes, tagsRes, ailmentsRes] = await Promise.all([
@@ -102,23 +150,127 @@ export default function PlantFilters({
     onAilmentChange(newAilments);
   };
 
-  const totalFilters = selectedCategories.length + selectedTags.length + selectedAilments.length;
+  const handleRegionToggle = (region: string) => {
+    const newRegions = selectedRegions.includes(region)
+      ? selectedRegions.filter(r => r !== region)
+      : [...selectedRegions, region];
+    onRegionChange(newRegions);
+  };
+
+  const totalFilters = selectedCategories.length + selectedRegions.length + selectedTags.length + selectedAilments.length;
 
   // Contenido de los filtros (reutilizable para móvil y desktop)
   const FilterContent = () => (
-    <div className="space-y-6">
-      {/* Dolencias - PRIMERO */}
-      <div className="space-y-3">
-        <h4 className="font-medium text-sm text-muted-foreground">
-          Dolencias que trata
-          {selectedAilments.length > 0 && (
-            <span className="ml-2 text-green-600 dark:text-green-400">
-              ({selectedAilments.length})
-            </span>
-          )}
-        </h4>
-        <div className="space-y-2">
-          {ailments.map((ailment) => (
+    <Accordion type="multiple" className="space-y-2">
+      {/* Regiones - PRIMERO */}
+      <AccordionItem value="region" className="border rounded-lg px-4">
+        <AccordionTrigger className="hover:no-underline">
+          <h4 className="font-medium text-sm text-muted-foreground">
+            🌍 Región de Origen
+            {selectedRegions.length > 0 && (
+              <span className="ml-2 text-primary">({selectedRegions.length})</span>
+            )}
+          </h4>
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="space-y-2 pt-2">
+            <motion.label
+              whileHover={{ scale: 1.02 }}
+              className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all border-2 ${
+                selectedRegions.includes('Costa')
+                  ? 'bg-blue-500/20 border-blue-500 shadow-sm'
+                  : 'border-transparent hover:bg-muted/50'
+              }`}
+            >
+              <Checkbox
+                checked={selectedRegions.includes('Costa')}
+                onCheckedChange={() => handleRegionToggle('Costa')}
+              />
+              <span className={`text-sm flex-1 ${selectedRegions.includes('Costa') ? 'font-semibold text-blue-700 dark:text-blue-400' : ''}`}>
+                🌊 Costa
+              </span>
+              <Badge variant="secondary" className="ml-auto">
+                {regionCounts.Costa || 0}
+              </Badge>
+            </motion.label>
+
+            <motion.label
+              whileHover={{ scale: 1.02 }}
+              className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all border-2 ${
+                selectedRegions.includes('Sierra')
+                  ? 'bg-amber-500/20 border-amber-500 shadow-sm'
+                  : 'border-transparent hover:bg-muted/50'
+              }`}
+            >
+              <Checkbox
+                checked={selectedRegions.includes('Sierra')}
+                onCheckedChange={() => handleRegionToggle('Sierra')}
+              />
+              <span className={`text-sm flex-1 ${selectedRegions.includes('Sierra') ? 'font-semibold text-amber-700 dark:text-amber-400' : ''}`}>
+                ⛰️ Sierra
+              </span>
+              <Badge variant="secondary" className="ml-auto">
+                {regionCounts.Sierra || 0}
+              </Badge>
+            </motion.label>
+
+            <motion.label
+              whileHover={{ scale: 1.02 }}
+              className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all border-2 ${
+                selectedRegions.includes('Selva')
+                  ? 'bg-green-500/20 border-green-500 shadow-sm'
+                  : 'border-transparent hover:bg-muted/50'
+              }`}
+            >
+              <Checkbox
+                checked={selectedRegions.includes('Selva')}
+                onCheckedChange={() => handleRegionToggle('Selva')}
+              />
+              <span className={`text-sm flex-1 ${selectedRegions.includes('Selva') ? 'font-semibold text-green-700 dark:text-green-400' : ''}`}>
+                🌴 Selva
+              </span>
+              <Badge variant="secondary" className="ml-auto">
+                {regionCounts.Selva || 0}
+              </Badge>
+            </motion.label>
+
+            <motion.label
+              whileHover={{ scale: 1.02 }}
+              className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all border-2 ${
+                selectedRegions.includes('Introducidas')
+                  ? 'bg-purple-500/20 border-purple-500 shadow-sm'
+                  : 'border-transparent hover:bg-muted/50'
+              }`}
+            >
+              <Checkbox
+                checked={selectedRegions.includes('Introducidas')}
+                onCheckedChange={() => handleRegionToggle('Introducidas')}
+              />
+              <span className={`text-sm flex-1 ${selectedRegions.includes('Introducidas') ? 'font-semibold text-purple-700 dark:text-purple-400' : ''}`}>
+                🌍 Introducidas
+              </span>
+              <Badge variant="secondary" className="ml-auto">
+                {regionCounts.Introducidas || 0}
+              </Badge>
+            </motion.label>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+
+      {/* Dolencias - SEGUNDO */}
+      <AccordionItem value="ailments" className="border rounded-lg px-4">
+        <AccordionTrigger className="hover:no-underline">
+          <h4 className="font-medium text-sm text-muted-foreground">
+            💊 Dolencias que trata
+            {selectedAilments.length > 0 && (
+              <span className="ml-2 text-green-600 dark:text-green-400">
+                ({selectedAilments.length})
+              </span>
+            )}
+          </h4>
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="space-y-2 pt-2">{ailments.map((ailment) => (
             <motion.label
               key={ailment.name}
               whileHover={{ scale: 1.02 }}
@@ -135,6 +287,9 @@ export default function PlantFilters({
               <span className={`text-sm flex-1 ${selectedAilments.includes(ailment.name) ? 'font-semibold text-green-700 dark:text-green-400' : ''}`}>
                 {ailment.name}
               </span>
+              <Badge variant="secondary" className="ml-auto">
+                {ailmentCounts[ailment.name] || 0}
+              </Badge>
               {ailment.color && (
                 <div
                   className="w-3 h-3 rounded-full"
@@ -142,22 +297,22 @@ export default function PlantFilters({
                 />
               )}
             </motion.label>
-          ))}
-        </div>
-      </div>
+          ))}</div>
+        </AccordionContent>
+      </AccordionItem>
 
-      <Separator />
-
-      {/* Tags - SEGUNDO */}
-      <div className="space-y-3">
-        <h4 className="font-medium text-sm text-muted-foreground">
-          Propiedades
-          {selectedTags.length > 0 && (
-            <span className="ml-2 text-primary">({selectedTags.length})</span>
-          )}
-        </h4>
-        <div className="space-y-2">
-          {tags.map((tag) => (
+      {/* Tags - TERCERO */}
+      <AccordionItem value="tags" className="border rounded-lg px-4">
+        <AccordionTrigger className="hover:no-underline">
+          <h4 className="font-medium text-sm text-muted-foreground">
+            ✨ Propiedades
+            {selectedTags.length > 0 && (
+              <span className="ml-2 text-primary">({selectedTags.length})</span>
+            )}
+          </h4>
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="space-y-2 pt-2">{tags.map((tag) => (
             <motion.label
               key={tag.name}
               whileHover={{ scale: 1.02 }}
@@ -174,6 +329,9 @@ export default function PlantFilters({
               <span className={`text-sm flex-1 ${selectedTags.includes(tag.name) ? 'font-semibold text-blue-700 dark:text-blue-400' : ''}`}>
                 {tag.name}
               </span>
+              <Badge variant="secondary" className="ml-auto">
+                {tagCounts[tag.name] || 0}
+              </Badge>
               {tag.color && (
                 <div
                   className="w-3 h-3 rounded-full"
@@ -181,22 +339,22 @@ export default function PlantFilters({
                 />
               )}
             </motion.label>
-          ))}
-        </div>
-      </div>
-
-      <Separator />
+          ))}</div>
+        </AccordionContent>
+      </AccordionItem>
 
       {/* Categorías - AL FINAL */}
-      <div className="space-y-3">
-        <h4 className="font-medium text-sm text-muted-foreground">
-          Categorías
-          {selectedCategories.length > 0 && (
-            <span className="ml-2 text-primary">({selectedCategories.length})</span>
-          )}
-        </h4>
-        <div className="space-y-2">
-          {categories.map((category) => (
+      <AccordionItem value="categories" className="border rounded-lg px-4">
+        <AccordionTrigger className="hover:no-underline">
+          <h4 className="font-medium text-sm text-muted-foreground">
+            📂 Categorías
+            {selectedCategories.length > 0 && (
+              <span className="ml-2 text-primary">({selectedCategories.length})</span>
+            )}
+          </h4>
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="space-y-2 pt-2">{categories.map((category) => (
             <motion.label
               key={category.name}
               whileHover={{ scale: 1.02 }}
@@ -213,6 +371,9 @@ export default function PlantFilters({
               <span className={`text-sm flex-1 ${selectedCategories.includes(category.name) ? 'font-semibold text-primary' : ''}`}>
                 {category.name}
               </span>
+              <Badge variant="secondary" className="ml-auto">
+                {categoryCounts[category.name] || 0}
+              </Badge>
               {category.color && (
                 <div
                   className="w-3 h-3 rounded-full"
@@ -220,10 +381,10 @@ export default function PlantFilters({
                 />
               )}
             </motion.label>
-          ))}
-        </div>
-      </div>
-    </div>
+          ))}</div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 
   if (loading) {

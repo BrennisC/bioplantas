@@ -72,29 +72,40 @@ export default function AnalyticsManager() {
       ]);
 
       // Top 5 plantas más favoritas
-      const { data: favData } = await supabase
+      const { data: favData, error: favError } = await supabase
         .from('favorites')
-        .select('plant_id');
+        .select('plant_id, plants(name)')
+        .not('plant_id', 'is', null);
 
-      const plantCounts = new Map<string, number>();
-      favData?.forEach(fav => {
-        plantCounts.set(fav.plant_id, (plantCounts.get(fav.plant_id) || 0) + 1);
+      console.log('📊 Datos de favoritos:', favData);
+      console.log('❌ Error favoritos:', favError);
+
+      // Contar favoritos por planta
+      const plantCounts = new Map<string, { name: string; count: number }>();
+      favData?.forEach((fav: any) => {
+        if (fav.plant_id && fav.plants) {
+          const plantName = fav.plants.name || 'Desconocida';
+          const existing = plantCounts.get(fav.plant_id);
+          if (existing) {
+            existing.count++;
+          } else {
+            plantCounts.set(fav.plant_id, { name: plantName, count: 1 });
+          }
+        }
       });
 
-      const topPlantIds = Array.from(plantCounts.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
+      console.log('📈 Conteo de plantas:', Array.from(plantCounts.entries()));
 
-      const topPlantsData = await Promise.all(
-        topPlantIds.map(async ([plantId, count]) => {
-          const { data } = await supabase
-            .from('plants')
-            .select('name')
-            .eq('id', plantId)
-            .single();
-          return { name: data?.name || 'Desconocida', favorites: count };
-        })
-      );
+      // Top 5
+      const topPlantsData = Array.from(plantCounts.values())
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5)
+        .map(plant => ({ 
+          name: plant.name.length > 20 ? plant.name.substring(0, 20) + '...' : plant.name, 
+          favorites: plant.count 
+        }));
+
+      console.log('🏆 Top 5 plantas:', topPlantsData);
 
       // Categorías de plantas
       const { data: plantsData } = await supabase
@@ -108,9 +119,23 @@ export default function AnalyticsManager() {
         }
       });
 
-      const categoriesData = Array.from(categoryCounts.entries())
+      const allCategories = Array.from(categoryCounts.entries())
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count);
+
+      // Solo mostrar top 4 categorías, el resto en "Otros"
+      const top4Categories = allCategories.slice(0, 4);
+      const otherCategories = allCategories.slice(4);
+      
+      const categoriesData = otherCategories.length > 0 
+        ? [
+            ...top4Categories,
+            {
+              name: 'Otros',
+              count: otherCategories.reduce((sum, cat) => sum + cat.count, 0)
+            }
+          ]
+        : top4Categories;
 
       // Crecimiento de usuarios por mes
       const { data: usersData } = await supabase
@@ -142,6 +167,9 @@ export default function AnalyticsManager() {
         .select('created_at')
         .gte('created_at', sevenDaysAgo.toISOString());
 
+      console.log('💬 Comentarios recientes:', recentComments?.length);
+      console.log('❤️ Favoritos recientes:', recentFavorites?.length);
+
       const activityMap = new Map<string, { comments: number; favorites: number }>();
       
       for (let i = 6; i >= 0; i--) {
@@ -168,6 +196,8 @@ export default function AnalyticsManager() {
       const activityData = Array.from(activityMap.entries())
         .map(([date, data]) => ({ date, ...data }));
 
+      console.log('📅 Datos de actividad:', activityData);
+
       setAnalytics({
         totalPlants: plantsRes.count || 0,
         totalUsers: usersRes.count || 0,
@@ -177,6 +207,12 @@ export default function AnalyticsManager() {
         categoriesData,
         usersGrowth,
         activityData
+      });
+
+      console.log('✅ Analytics actualizados:', {
+        totalFavorites: favoritesRes.count,
+        topPlantsCount: topPlantsData.length,
+        activityDays: activityData.length
       });
 
     } catch (error: any) {
@@ -268,27 +304,42 @@ export default function AnalyticsManager() {
             <Star className="h-5 w-5 text-yellow-500" />
             <h3 className="text-lg font-semibold">Top 5 Plantas Favoritas</h3>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={analytics.topPlants}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis 
-                dataKey="name" 
-                angle={-45} 
-                textAnchor="end" 
-                height={100}
-                tick={{ fill: '#888', fontSize: 12 }}
-              />
-              <YAxis tick={{ fill: '#888' }} />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#1f1f1f', 
-                  border: '1px solid #333',
-                  borderRadius: '8px'
-                }}
-              />
-              <Bar dataKey="favorites" fill="#10b981" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          
+          {analytics.topPlants.length === 0 ? (
+            <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+              No hay plantas favoritas aún
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={analytics.topPlants} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-45} 
+                  textAnchor="end" 
+                  height={100}
+                  tick={{ fill: '#888', fontSize: 11 }}
+                  interval={0}
+                />
+                <YAxis tick={{ fill: '#888' }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1f1f1f', 
+                    border: '1px solid #333',
+                    borderRadius: '8px',
+                    color: '#fff'
+                  }}
+                  cursor={{ fill: 'rgba(16, 185, 129, 0.1)' }}
+                />
+                <Bar 
+                  dataKey="favorites" 
+                  fill="#10b981" 
+                  radius={[8, 8, 0, 0]}
+                  name="Favoritos"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </motion.div>
 
         {/* Distribución por categorías */}
@@ -301,31 +352,56 @@ export default function AnalyticsManager() {
             <Leaf className="h-5 w-5 text-green-500" />
             <h3 className="text-lg font-semibold">Distribución por Categorías</h3>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={analytics.categoriesData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="count"
-              >
-                {analytics.categoriesData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          
+          {analytics.categoriesData.length === 0 ? (
+            <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+              No hay datos de categorías
+            </div>
+          ) : (
+            <div className="flex items-center gap-4">
+              <ResponsiveContainer width="60%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={analytics.categoriesData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="count"
+                    label={false}
+                  >
+                    {analytics.categoriesData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#1f1f1f', 
+                      border: '1px solid #333',
+                      borderRadius: '8px',
+                      color: '#fff'
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              
+              <div className="flex-1 space-y-2">
+                {analytics.categoriesData.map((cat, index) => (
+                  <div key={cat.name} className="flex items-center gap-2">
+                    <div 
+                      className="w-4 h-4 rounded-sm" 
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    />
+                    <span className="text-sm flex-1">{cat.name}</span>
+                    <span className="text-sm font-semibold">{cat.count}</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({((cat.count / analytics.totalPlants) * 100).toFixed(0)}%)
+                    </span>
+                  </div>
                 ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#1f1f1f', 
-                  border: '1px solid #333',
-                  borderRadius: '8px'
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+              </div>
+            </div>
+          )}
         </motion.div>
 
         {/* Actividad de los últimos 7 días */}

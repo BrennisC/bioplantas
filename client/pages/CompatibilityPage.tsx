@@ -328,7 +328,7 @@ export default function CompatibilityPage() {
                                   .eq('name', interaction.medication_name)
                                   .single()
                                   .then(({ data }) => {
-                                    if (data) navigate(`/medicamentos/${data.id}`);
+                                    if (data) navigate(`/medications/${data.id}`);
                                   });
                               }}
                             >

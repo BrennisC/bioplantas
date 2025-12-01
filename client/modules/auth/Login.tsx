@@ -53,35 +53,40 @@ export default function Login() {
     const result = await login(email, password);
     
     if (result.success) {
-      // Esperar un momento para que se cargue la sesión con el rol
+      const userRole = result.role;
+      
+      console.log('🔐 Login exitoso:', { 
+        userRole, 
+        email: result.email,
+        userId: result.userId 
+      });
+      
+      toast({
+        title: "✅ Inicio de sesión exitoso",
+        description: userRole === 'admin' 
+          ? "Redirigiendo al panel de administración..." 
+          : "Bienvenido a BioPlantes",
+      });
+      
+      // Redirigir según el rol INMEDIATAMENTE
       setTimeout(() => {
-        const userRole = result.role || session?.role;
-        
-        console.log('🔐 Login exitoso:', { userRole, resultRole: result.role, sessionRole: session?.role });
-        
-        toast({
-          title: "¡Bienvenido!",
-          description: userRole === 'admin' ? "Accediendo al panel de administración" : "Has iniciado sesión correctamente",
-        });
-        
-        // Redirigir según el rol
         if (userRole === 'admin') {
-          console.log('🎯 Redirigiendo a /dashboard');
+          console.log('👑 Redirigiendo admin a /dashboard');
           nav("/dashboard", { replace: true });
         } else {
-          console.log('🎯 Redirigiendo a /explorar');
+          console.log('👤 Redirigiendo usuario a /explorar');
           nav("/explorar", { replace: true });
         }
-      }, 500);
+      }, 300); // Reducido a 300ms para redirección más rápida
+      
     } else {
       toast({
-        title: "Error al iniciar sesión",
+        title: "❌ Error al iniciar sesión",
         description: result.error || "Credenciales incorrectas",
         variant: "destructive"
       });
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
